@@ -45,13 +45,14 @@ bun run build:backend
 
 ```json
 {
-"workspaces": ["backend", "frontend/stockmaster-client"]
+  "workspaces": ["backend", "frontend/stockmaster-client"]
 }
 ```
 
 ### 2. `backend/package.json` (modificado)
 
 **Agregado:**
+
 ```json
 "scripts": {
 "dev": "bun run --hot index.ts",
@@ -62,10 +63,12 @@ bun run build:backend
 ### 3. `frontend/stockmaster-client/package.json` (modificado)
 
 **Cambiado:**
+
 ```json
 "packageManager": "bun@1.3.4"
 ```
-(antes era `npm@10.9.3`)
+
+(antes erm `npm@10.9.3`)
 
 ### 4. `.gitignore` (creado)
 
@@ -83,5 +86,7 @@ dist/
 - Dependencias compartidas (TypeScript, etc.)
 - Scripts centralizados
 - Listo para `packages/shared`
+
   ```
 
+  ```
