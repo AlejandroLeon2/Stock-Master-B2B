@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun tsc && node dist/index.js",
+    "dev": "tsc && node dist/index.js",
     "start": "node dist/index.js",
     "build-deploy": "tsc",
     "build": "bun build index.ts --outdir ./dist"
@@ -22,9 +22,10 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "express": "^5.2.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
     "zod": "^4.1.12"
   }
 }
