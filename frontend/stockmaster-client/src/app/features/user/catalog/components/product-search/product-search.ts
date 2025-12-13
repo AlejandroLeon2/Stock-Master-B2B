@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
   selector: 'app-product-search',
   imports: [ReactiveFormsModule],
   templateUrl: './product-search.html',
-  styleUrl: './product-search.css',
+  styleUrls: ['./product-search.css'],
 })
 export class ProductSearch {
   searchControl = new FormControl('');

@@ -6,7 +6,7 @@ import { CatalogService } from '../../services/catalog.service';
   selector: 'app-catalog-page',
   imports: [ProductSearch],
   templateUrl: './catalog-page.html',
-  styleUrl: './catalog-page.css',
+  styleUrls: ['./catalog-page.css'],
 })
 export class CatalogPage {
   catalogService = inject(CatalogService);
