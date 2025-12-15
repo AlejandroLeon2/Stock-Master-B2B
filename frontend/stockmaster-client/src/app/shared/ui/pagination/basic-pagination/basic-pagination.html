@@ -1,0 +1,23 @@
+<section class="pagination">
+  <button
+    [disabled]="page() === 1"
+    [class.disabled]="page() === 1"
+    class="pagination-item"
+    (click)="goToPage(page() - 1)"
+  >
+    Atrás
+  </button>
+  @for (i of pages(); track i) {
+  <button [class.active]="page() === i" class="pagination-item" (click)="goToPage(i)">
+    {{ i }}
+  </button>
+  }
+  <button
+    [disabled]="page() === totalPages()"
+    [class.disabled]="page() === totalPages()"
+    class="pagination-item"
+    (click)="goToPage(page() + 1)"
+  >
+    Siguiente
+  </button>
+</section>

@@ -3,7 +3,7 @@ import { catalogRoutes } from './features/user/catalog/catalog.routes';
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'catalog',
     children: catalogRoutes,
   },
 ];
