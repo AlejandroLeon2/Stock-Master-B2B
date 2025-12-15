@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { CatalogFilters, FilterOptions } from '../../../../core/domain/models/catalog-filter.model';
+import { CatalogFilters, FilterOptions } from '../../../../core/models/catalog-filter.model';
 
 /**
  * Servicio reactivo para manejar el estado de los filtros del catálogo.
