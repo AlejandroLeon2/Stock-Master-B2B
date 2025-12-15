@@ -1,1 +1,5 @@
-<p>product-search works!</p>
+<app-search-input
+  (valueChange)="searchChange.emit($event)"
+  [placeholder]="'Buscar por sku o nombre'"
+  [control]="searchControl"
+/>
