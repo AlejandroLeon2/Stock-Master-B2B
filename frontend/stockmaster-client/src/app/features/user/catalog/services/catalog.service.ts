@@ -1,6 +1,7 @@
 import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import {
   catchError,
+  combineLatest,
   debounceTime,
   filter,
   map,
@@ -13,6 +14,7 @@ import {
 import { ApiService } from '../../../../core/http/api.service';
 import { Product } from '../../../../core/models/product.model';
 import { CatalogFilterService } from './catalog-filter.service';
+import { CatalogFilters } from '../../../../core/models/catalog-filter.model';
 
 interface SearchProductsResponse {
   products: Product[];
@@ -34,6 +36,9 @@ export class CatalogService implements OnDestroy {
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
 
+  // Guarda todos los productos sin filtrar (para aplicar filtros cliente-side)
+  private allProducts: Product[] = [];
+  
   products = signal<Product[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -47,6 +52,7 @@ export class CatalogService implements OnDestroy {
 
   constructor() {
     this.initSearchFlow();
+    this.initFilterFlow();
   }
 
   searchProducts(term: string) {
@@ -58,6 +64,58 @@ export class CatalogService implements OnDestroy {
     this.term.set(search);
     this.page.set(page);
     this.search$.next(search);
+  }
+
+  /**
+   * Inicializa el flujo de escucha de filtros
+   * Cuando cambian los filtros, vuelve a aplicarlos a los productos actuales
+   */
+  private initFilterFlow() {
+    this.filterService.filters$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        // Cuando cambian los filtros, re-aplicarlos a los productos actuales
+        this.applyFilters();
+      });
+  }
+
+  /**
+   * Aplica los filtros actuales a los productos
+   */
+  private applyFilters(): void {
+    const currentFilters = this.filterService.getCurrentFilters();
+    const filtered = this.filterProductsByFilters(this.allProducts, currentFilters);
+    this.products.set(filtered);
+  }
+
+  /**
+   * Filtra un array de productos basado en los filtros seleccionados
+   */
+  private filterProductsByFilters(productsToFilter: Product[], filters: CatalogFilters): Product[] {
+    return productsToFilter.filter((product) => {
+      // Filtro de categorías
+      if (filters.categories.length > 0) {
+        if (!product.categoryId || !filters.categories.includes(product.categoryId)) {
+          return false;
+        }
+      }
+
+      // Filtro de marcas
+      if (filters.brands.length > 0) {
+        if (!product.brand || !filters.brands.includes(product.brand)) {
+          return false;
+        }
+      }
+
+      // Filtro de disponibilidad
+      if (filters.inStockOnly) {
+        if (!product.stockUnits || product.stockUnits <= 0) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 
   private initSearchFlow() {
@@ -97,12 +155,16 @@ export class CatalogService implements OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((data) => {
-        this.products.set(data.products || []);
+        // Guardar todos los productos sin filtrar
+        this.allProducts = data.products || [];
         this.metadata.set(data.metadata);
         this.loading.set(false);
         
         // Actualizar opciones de filtros dinámicamente basado en los productos actuales
-        this.filterService.updateFilterOptions(data.products || []);
+        this.filterService.updateFilterOptions(this.allProducts);
+        
+        // Aplicar filtros a los productos obtenidos
+        this.applyFilters();
       });
   }
 
