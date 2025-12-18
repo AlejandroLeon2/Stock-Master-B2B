@@ -4,9 +4,10 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: '/shop/home',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
   {
+
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.authRoutes)
   },
@@ -32,6 +33,11 @@ export const routes: Routes = [
       },
       
   */
+                     {
+        path: 'checkout',
+        loadComponent: () =>
+          import('./features/user/checkout/pages/checkout-page/checkout').then((c) => c.Checkout),
+      }
     ]
   },
 ];
