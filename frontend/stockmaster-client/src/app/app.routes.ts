@@ -27,17 +27,23 @@ export const routes: Routes = [
       path: 'catalog',
       loadComponent: () => import('./features/user/catalog/pages/catalog-page/catalog-page').then(c => c.CatalogPage)
     },
-      /* {
-        path:'cart',
-        loadComponent: () => import('./features/user/home/p').then(c => c.Home)
-      },
-      
-  */
-                     {
-        path: 'checkout',
-        loadComponent: () =>
-          import('./features/user/checkout/pages/checkout-page/checkout').then((c) => c.Checkout),
-      }
+    /* {
+      path:'cart',
+      loadComponent: () => import('./features/user/home/p').then(c => c.Home)
+    },
+    
+*/
+    {
+      path: 'checkout',
+      loadComponent: () =>
+        import('./features/user/checkout/pages/checkout-page/checkout').then((c) => c.Checkout),
+    }
     ]
   },
+
+  {
+    path: 'admin',
+    loadComponent: () => import('./layouts/admin-layout/admin-layout').then(m => m.AdminLayout),
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes)
+  }
 ];
