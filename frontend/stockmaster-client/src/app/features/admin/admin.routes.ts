@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../core/guards/role.guard';
 
 export const adminRoutes: Routes = [
     {
@@ -8,11 +9,27 @@ export const adminRoutes: Routes = [
     },
     {
         path: 'dashboard',
-        // Componente temporal inline para visualizar algo
-        loadComponent: () => import('@angular/core').then(m => {
-            @m.Component({ template: '<div class="p-4"><h2 class="text-2xl font-bold">Dashboard</h2><p>Bienvenido al Panel de Administración</p></div>', standalone: true })
-            class DashboardPlaceholder { }
-            return DashboardPlaceholder;
-        })
+        loadComponent: () => import('./dashboard/dashboard').then(m => m.DashboardPage),
+        canActivate: [roleGuard(['admin', 'warehouse', 'driver'])]
+    },
+    {
+        path: 'users',
+        loadComponent: () => import('./users/pages/users-page/users-page').then(m => m.UsersPage),
+        canActivate: [roleGuard(['admin'])]
+    },
+    {
+        path: 'routes',
+        loadComponent: () => import('./routes/pages/routes-page/routes-page').then(m => m.RoutesPage),
+        canActivate: [roleGuard(['admin', 'driver'])]
+    },
+    {
+        path: 'profile',
+        loadComponent: () => import('./profile/profile-page').then(m => m.ProfilePage),
+        canActivate: [roleGuard(['admin', 'warehouse', 'driver'])] // Acceso para todos los roles staff
+    },
+    {
+        path: 'settings',
+        loadComponent: () => import('./settings/settings-page').then(m => m.SettingsPage),
+        canActivate: [roleGuard(['admin', 'warehouse', 'driver'])] // Acceso para todos los roles staff
     }
 ];

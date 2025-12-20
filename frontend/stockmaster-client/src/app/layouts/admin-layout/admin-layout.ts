@@ -10,5 +10,7 @@ import { AdminHeader } from './components/admin-header';
   styleUrls: ['./admin-layout.css'],
 })
 export class AdminLayout {
-
+  constructor() {
+    console.log('✅ AdminLayout Initialized');
+  }
 }

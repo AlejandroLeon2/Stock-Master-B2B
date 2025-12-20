@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/shop/home',
-    pathMatch: 'full',
+    loadComponent: () => import('./shared/ui/startup/startup.component').then(m => m.StartupComponent)
   },
   {
 
@@ -43,6 +43,7 @@ export const routes: Routes = [
 
   {
     path: 'admin',
+    canActivate: [roleGuard(['admin', 'warehouse', 'driver'])],
     loadComponent: () => import('./layouts/admin-layout/admin-layout').then(m => m.AdminLayout),
     loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes)
   }
