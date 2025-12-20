@@ -1,14 +1,20 @@
+import {
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  Transaction,
+} from "@google-cloud/firestore";
 import { Filter } from "firebase-admin/firestore";
 import { db } from "../config/firebase";
 import type {
-  Product,
-  Subcategory,
   Category,
+  Product,
   ProductDoc,
+  Subcategory,
 } from "../models/product.model";
-import { QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
 
 export class ProductService {
+  private productsCollection = db.collection("products");
+
   constructor() {}
   /**
    * Servicio para buscar productos
@@ -128,5 +134,26 @@ export class ProductService {
 
   private async mapProducts(snapshot: QuerySnapshot): Promise<Product[]> {
     return Promise.all(snapshot.docs.map((doc) => this.buildProduct(doc)));
+  }
+
+  /**
+   * Obtiene un mapa de productos por su ID
+   * @param ids - Array de IDs de productos
+   * @param tx - Transacción opcional
+   * @returns Un mapa de productos con sus IDs como claves
+   */
+  async getProductsMapById(ids: string[], tx?: Transaction) {
+    const handler = tx || db;
+
+    const productsSnapshots = await handler.getAll(
+      ...ids.map((id) => this.productsCollection.doc(id))
+    );
+
+    const products = productsSnapshots.reduce((acc, snap) => {
+      acc[snap.id] = snap.data() as ProductDoc;
+      return acc;
+    }, {} as Record<string, ProductDoc>);
+
+    return products;
   }
 }
