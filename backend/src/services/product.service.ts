@@ -5,6 +5,7 @@ import {
 } from "@google-cloud/firestore";
 import { Filter } from "firebase-admin/firestore";
 import { db } from "../config/firebase";
+
 import type {
   Category,
   Product,
@@ -12,10 +13,12 @@ import type {
   Subcategory,
 } from "../models/product.model";
 
+
 export class ProductService {
   private productsCollection = db.collection("products");
 
   constructor() {}
+  
   /**
    * Servicio para buscar productos
    */
@@ -37,7 +40,11 @@ export class ProductService {
         const totalProducts = snapshotTotal.data().count;
         const snapshot = await query.offset(offset).limit(limit).get();
 
-        const products = await this.mapProducts(snapshot);
+        const products = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
         return {
           products,
           metadata: {
@@ -73,7 +80,7 @@ export class ProductService {
       const products = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as Product[];
 
       return {
         products,
@@ -87,6 +94,7 @@ export class ProductService {
       return { products: [], metadata: { count: 0, pages: 0 } };
     }
   }
+
 
   private async buildProduct(doc: QueryDocumentSnapshot): Promise<Product> {
     const data = doc.data() as ProductDoc;
