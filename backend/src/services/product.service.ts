@@ -1,17 +1,22 @@
+import {
+  Transaction,
+} from "@google-cloud/firestore";
 import { Filter } from "firebase-admin/firestore";
 import { db } from "../config/firebase";
+
 import type {
   Product,
-  Subcategory,
-  Category,
   ProductDoc,
 } from "../models/product.model";
-import { QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
 
 export class ProductService {
+  private productsCollection = db.collection("products");
+
   constructor() {}
+
   /**
-   * Servicio para buscar productos
+   * Servicio para buscar productos (listado + paginación)
+   * Ligero para búsquedas rápidas en B2B.
    */
   async searchProducts(params: {
     search: string;
@@ -24,14 +29,20 @@ export class ProductService {
       const limit = params.limit || 10;
       const offset = (page - 1) * limit;
 
-      let query = db.collection("products");
+      let query = this.productsCollection;
 
+      // Sin término de búsqueda: solo paginación
       if (!searchTerm) {
         const snapshotTotal = await query.count().get();
         const totalProducts = snapshotTotal.data().count;
+
         const snapshot = await query.offset(offset).limit(limit).get();
 
-        const products = await this.mapProducts(snapshot);
+        const products = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Product[];
+
         return {
           products,
           metadata: {
@@ -41,6 +52,7 @@ export class ProductService {
         };
       }
 
+      // Con término de búsqueda: searchName, sku y searchArray
       const baseQuery = query.where(
         Filter.or(
           ...searchTerm
@@ -55,7 +67,9 @@ export class ProductService {
             Filter.where("sku", ">=", searchTerm),
             Filter.where("sku", "<=", searchTerm + "\uf8ff")
           ),
-          Filter.and(Filter.where("searchArray", "array-contains", searchTerm))
+          Filter.and(
+            Filter.where("searchArray", "array-contains", searchTerm)
+          )
         )
       );
 
@@ -67,7 +81,7 @@ export class ProductService {
       const products = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      })) as Product[];
 
       return {
         products,
@@ -82,51 +96,41 @@ export class ProductService {
     }
   }
 
-  private async buildProduct(doc: QueryDocumentSnapshot): Promise<Product> {
-    const data = doc.data() as ProductDoc;
+  /**
+   * Obtiene el detalle de un producto por ID
+   * Ideal para la página de detalle en Angular.
+   */
+  async getProductById(id: string): Promise<Product | null> {
+    const snap = await this.productsCollection.doc(id).get();
 
-    let category: Category | undefined;
-    if (data.categoryId) {
-      const categorySnap = await db
-        .collection("categories")
-        .doc(data.categoryId)
-        .get();
-      if (categorySnap.exists) {
-        const catData = categorySnap.data();
-        if (catData) {
-          category = { id: categorySnap.id, name: catData.name as string };
-        }
-      }
+    if (!snap.exists) {
+      return null;
     }
-
-    let subCategory: Subcategory | undefined;
-    if (data.categoryId && data.subcategoryId) {
-      const subSnap = await db
-        .collection("categories")
-        .doc(data.categoryId)
-        .collection("subcategories")
-        .doc(data.subcategoryId)
-        .get();
-
-      if (subSnap.exists) {
-        const subData = subSnap.data();
-        if (subData) {
-          subCategory = { id: subSnap.id, name: subData.name as string };
-        }
-      }
-    }
-
-    const { categoryId, subcategoryId, ...rest } = data;
 
     return {
-      ...rest,
-      id: doc.id,
-      category,
-      subCategory,
-    };
+      id: snap.id,
+      ...snap.data(),
+    } as Product;
   }
 
-  private async mapProducts(snapshot: QuerySnapshot): Promise<Product[]> {
-    return Promise.all(snapshot.docs.map((doc) => this.buildProduct(doc)));
+  /**
+   * Obtiene un mapa de productos por su ID
+   * @param ids - Array de IDs de productos
+   * @param tx - Transacción opcional
+   * @returns Un mapa de productos con sus IDs como claves
+   */
+  async getProductsMapById(ids: string[], tx?: Transaction) {
+    const handler = tx || db;
+
+    const productsSnapshots = await handler.getAll(
+      ...ids.map((id) => this.productsCollection.doc(id))
+    );
+
+    const products = productsSnapshots.reduce((acc, snap) => {
+      acc[snap.id] = snap.data() as ProductDoc;
+      return acc;
+    }, {} as Record<string, ProductDoc>);
+
+    return products;
   }
 }
