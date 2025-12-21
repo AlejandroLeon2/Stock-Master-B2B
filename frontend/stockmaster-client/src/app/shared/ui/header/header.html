@@ -32,9 +32,9 @@
           </svg>
         </button>
 -->
-        <!-- Cart Button -->
+        <!-- Cart Button  routerLink="/cart" -->
         <button
-          routerLink="/cart"
+          (click)="openCart()"
           class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
           aria-label="Carrito"
         >
@@ -49,7 +49,11 @@
           </span>
           }
         </button>
-
+        <app-cart-page
+          [isOpen]="showCartModal()"
+          (closeModalEvent)="closeCart()"
+          [isModal]="true"
+        />
         <!-- User Button -->
         <button
           routerLink="/profile"

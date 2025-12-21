@@ -26,12 +26,10 @@ export const routes: Routes = [
       path: 'catalog',
       loadComponent: () => import('./features/user/catalog/pages/catalog-page/catalog-page').then(c => c.CatalogPage)
     },
-    /* {
-      path:'cart',
-      loadComponent: () => import('./features/user/home/p').then(c => c.Home)
-    },
-    
-*/
+      {
+        path: 'cart',
+        loadComponent: () => import('./features/user/cart/pages/cart-page/cart-page').then((c) => c.CartPage),
+      },
     {
       path: 'checkout',
       loadComponent: () =>
