@@ -34,7 +34,7 @@ export class AuthService {
 
     constructor() {
         // Escuchar cambios de sesión
-        onAuthStateChanged(this.auth, (user) => {
+        onAuthStateChanged(this.auth, (user: FirebaseUser | null) => {
             this.currentUser.set(user);
         });
     }

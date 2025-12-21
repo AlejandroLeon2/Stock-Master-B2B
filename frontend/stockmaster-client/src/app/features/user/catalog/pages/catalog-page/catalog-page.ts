@@ -32,4 +32,8 @@ export class CatalogPage implements OnInit {
   onSearchChange(searchTerm: string) {
     this.catalogService.searchProducts(searchTerm);
   }
+
+  onPageChange(page: number) {
+    this.catalogService.setPage(page);
+  }
 }

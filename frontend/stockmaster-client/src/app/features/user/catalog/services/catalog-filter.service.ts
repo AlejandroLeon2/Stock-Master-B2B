@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { CatalogFilters, FilterOptions } from '../../../../core/models/catalog-filter.model';
+import { CatalogFilters, FilterOptions, CategoryOption } from '../../../../core/models/catalog-filter.model';
 import { Product } from '../../../../core/models/product.model';
 
 /**
@@ -14,6 +14,7 @@ export class CatalogFilterService {
   // Estado inicial: sin filtros aplicados
   private filtersSubject = new BehaviorSubject<CatalogFilters>({
     categories: [],
+    subcategories: [],
     brands: [],
     inStockOnly: false,
   });
@@ -49,6 +50,17 @@ export class CatalogFilterService {
   }
 
   /**
+   * Establece las subcategorías seleccionadas
+   */
+  setSubcategories(subcategories: string[]): void {
+    const current = this.filtersSubject.value;
+    this.filtersSubject.next({
+      ...current,
+      subcategories: [...subcategories],
+    });
+  }
+
+  /**
    * Establece las marcas seleccionadas
    */
   setBrands(brands: string[]): void {
@@ -76,6 +88,7 @@ export class CatalogFilterService {
   clearFilters(): void {
     this.filtersSubject.next({
       categories: [],
+      subcategories: [],
       brands: [],
       inStockOnly: false,
     });
@@ -85,13 +98,23 @@ export class CatalogFilterService {
    * Actualiza las opciones de filtros dinámicamente basado en los productos actuales
    * Extrae categorías únicas y marcas de los productos de búsqueda
    */
-  updateFilterOptions(products: Product[]): void {
-    const categories = this.extractUniqueCategoriesFromProducts(products);
+  updateFilterOptionsFromProducts(products: Product[]): void {
     const brands = this.extractUniqueBrandsFromProducts(products);
 
     this.filterOptionsSubject.next({
-      categories,
+      categories: this.filterOptionsSubject.value.categories,
       brands,
+    });
+  }
+
+  /**
+   * Establece las categorías (con nombres y subcategorías) desde backend
+   */
+  setFilterOptionsCategories(categories: CategoryOption[]): void {
+    const current = this.filterOptionsSubject.value;
+    this.filterOptionsSubject.next({
+      ...current,
+      categories: categories,
     });
   }
 
@@ -105,26 +128,7 @@ export class CatalogFilterService {
   /**
    * Extrae categorías únicas de los productos
    */
-  private extractUniqueCategoriesFromProducts(
-    products: Product[]
-  ): { id: string; name: string }[] {
-    const categoriesMap = new Map<string, string>();
-
-    products.forEach((product) => {
-      if (product.categoryId && product.categoryId !== '') {
-        // Usar categoryId como id, y el mismo para el nombre
-        // El backend debería proporcionar el nombre en futuro
-        if (!categoriesMap.has(product.categoryId)) {
-          categoriesMap.set(product.categoryId, product.categoryId);
-        }
-      }
-    });
-
-    return Array.from(categoriesMap.entries()).map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }
+  // Eliminado: las categorías provienen del backend ahora
 
   /**
    * Extrae marcas únicas de los productos

@@ -3,6 +3,7 @@
  */
 export interface CatalogFilters {
   categories: string[];
+  subcategories: string[];
   brands: string[];
   inStockOnly: boolean;
 }
@@ -12,7 +13,13 @@ export interface CatalogFilters {
  * Se actualiza dinámicamente basado en los productos de la búsqueda actual
  */
 export interface FilterOptions {
-  categories: { id: string; name: string }[];
+  categories: CategoryOption[];
   brands: string[];
+}
+
+export interface CategoryOption {
+  id: string;
+  name: string;
+  subcategories?: { id: string; name: string }[];
 }
 
