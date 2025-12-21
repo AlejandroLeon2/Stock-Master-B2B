@@ -7,6 +7,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+<<<<<<< HEAD
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then(m => m.authRoutes)
   },
@@ -16,6 +17,18 @@ export const routes: Routes = [
   },
   {
     path: 'shop',
+=======
+    path: 'catalog',
+    loadComponent: () =>
+      import('./layouts/user-layout/user-layout').then(c => c.UserLayout),
+    children: [{
+      path: '',
+      loadComponent: () => import('./features/user/catalog/pages/catalog-page/catalog-page').then(c => c.CatalogPage)
+    }]
+  },
+  {
+    path: 'shop', 
+>>>>>>> origin/filtros
     loadComponent: () =>
       import('./layouts/user-layout/user-layout').then(c => c.UserLayout),
     children: [{

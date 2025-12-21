@@ -13,7 +13,11 @@ export interface CatalogFilters {
  * Se actualiza dinámicamente basado en los productos de la búsqueda actual
  */
 export interface FilterOptions {
+<<<<<<< HEAD
   categories: CategoryOption[];
+=======
+  categories: { id: string; name: string }[];
+>>>>>>> origin/filtros
   brands: string[];
 }
 

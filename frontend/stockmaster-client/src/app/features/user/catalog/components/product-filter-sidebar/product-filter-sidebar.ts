@@ -2,8 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Trash2 } from 'lucide-angular';
+<<<<<<< HEAD
 import { FilterOptions, CategoryOption } from '../../../../../core/models/catalog-filter.model';
+=======
+import { FilterOptions } from '../../../../../core/models/catalog-filter.model';
+>>>>>>> origin/filtros
 import { CatalogFilterService } from '../../services/catalog-filter.service';
+import { getCategoryName } from '../../constants/category-mapping';
 
 @Component({
   selector: 'app-product-filter-sidebar',
@@ -113,6 +118,7 @@ export class ProductFilterSidebar implements OnInit {
    * Obtiene el nombre legible de una categoría
    */
   getCategoryDisplayName(categoryId: string): string {
+<<<<<<< HEAD
     const cat = this.filterOptions().categories.find((c) => c.id === categoryId);
     return cat?.name || categoryId;
   }
@@ -147,6 +153,9 @@ export class ProductFilterSidebar implements OnInit {
   private belongsToCategory(subId: string, categoryId: string): boolean {
     const cat = this.filterOptions().categories.find((c) => c.id === categoryId);
     return (cat?.subcategories || []).some((s) => s.id === subId);
+=======
+    return getCategoryName(categoryId);
+>>>>>>> origin/filtros
   }
 
   /**
