@@ -50,7 +50,7 @@ export class CatalogService implements OnDestroy {
 
   term = signal<string>('');
   page = signal<number>(1);
-  limit = signal<number>(12);
+  limit = signal<number>(4);
   metadata = signal<SearchProductsResponse['metadata']>({
     count: 0,
     pages: 0,
@@ -137,7 +137,7 @@ export class CatalogService implements OnDestroy {
           queryParams: {
             search: this.term() || undefined,
             page: this.page() || 1,
-            limit: this.limit() || 12,
+            limit: this.limit() || 4,
             categoryId,
             subcategoryId,
             brand,

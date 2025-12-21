@@ -1,3 +1,5 @@
+
+import { LucideAngularModule,ShoppingCart, Tag,Package } from 'lucide-angular';
 import { CurrencyPipe } from '@angular/common';
 import { Component, input,signal,inject } from '@angular/core';
 import { RouterLink } from '@angular/router';

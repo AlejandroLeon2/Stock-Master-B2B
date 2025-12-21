@@ -1,13 +1,8 @@
-import {
-  Transaction,
-} from "@google-cloud/firestore";
+import { Transaction } from "@google-cloud/firestore";
 import { Filter } from "firebase-admin/firestore";
 import { db } from "../config/firebase";
 
-import type {
-  Product,
-  ProductDoc,
-} from "../models/product.model";
+import type { Product, ProductDoc } from "../models/product.model";
 
 export class ProductService {
   private productsCollection = db.collection("products");
@@ -15,12 +10,8 @@ export class ProductService {
   constructor() {}
 
   /**
-<<<<<<< HEAD
    * Servicio para buscar productos con filtros opcionales (listado + paginación)
    * Los filtros se aplican en Firestore antes de la paginación para mantener consistencia
-=======
-   * Servicio para buscar productos con filtros opcionales
->>>>>>> origin/filtros
    */
   async searchProducts(params: {
     search?: string;
@@ -37,16 +28,11 @@ export class ProductService {
       const limit = params.limit || 10;
       const offset = (page - 1) * limit;
 
-<<<<<<< HEAD
-      let query: any = this.productsCollection;
-=======
-      let query = db.collection("products") as any;
->>>>>>> origin/filtros
+      let query: FirebaseFirestore.Query = this.productsCollection;
 
       // Aplicar filtros de igualdad primero (Firestore requiere que estos se apliquen antes de OR)
       if (params.categoryId) {
         query = query.where("categoryId", "==", params.categoryId);
-<<<<<<< HEAD
       }
 
       if (params.subcategoryId) {
@@ -98,13 +84,6 @@ export class ProductService {
           Filter.where("searchArray", "array-contains", searchTerm)
         )
       );
-=======
-      }
-
-      if (params.subcategoryId) {
-        query = query.where("subcategoryId", "==", params.subcategoryId);
-      }
->>>>>>> origin/filtros
 
       if (params.brand) {
         query = query.where("brand", "==", params.brand);
@@ -112,6 +91,10 @@ export class ProductService {
 
       if (params.inStockOnly) {
         query = query.where("stockUnits", ">", 0);
+      }
+
+      if (params.subcategoryId) {
+        query = query.where("subcategoryId", "==", params.subcategoryId);
       }
 
       // Aplicar búsqueda de texto si existe
@@ -166,9 +149,10 @@ export class ProductService {
       return {
         products,
         metadata: {
-          count: searchTerm && searchTerm.split(" ").length > 1
-            ? products.length
-            : totalProducts,
+          count:
+            searchTerm && searchTerm.split(" ").length > 1
+              ? products.length
+              : totalProducts,
           pages: Math.ceil(
             (searchTerm && searchTerm.split(" ").length > 1
               ? products.length

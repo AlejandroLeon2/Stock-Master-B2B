@@ -37,7 +37,7 @@ class CategoryController {
   async getCategoryById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const category = await this.categoryService.getCategoryById(id);
+      const category = await this.categoryService.getCategoryById(id as string);
 
       if (!category) {
         return res.status(404).json({
@@ -72,7 +72,7 @@ class CategoryController {
     try {
       const { categoryId } = req.params;
       const subcategories =
-        await this.categoryService.getSubcategoriesByCategoryId(categoryId);
+        await this.categoryService.getSubcategoriesByCategoryId(categoryId as string);
 
       res.status(200).json({
         success: true,

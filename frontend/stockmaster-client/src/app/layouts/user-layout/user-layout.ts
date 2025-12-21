@@ -5,10 +5,11 @@ import { LayoutService } from '../../core/services/layout.service';
 import { Modal } from '../../shared/ui/modal/modal';
 import { Login } from '../../features/auth/components/login/login';
 import { Register } from '../../features/auth/components/register/register';
+import { FooterComponent } from "../../footer/footer";
 
 @Component({
   selector: 'app-user-layout',
-  imports: [Header, RouterOutlet, Modal, Login, Register],
+  imports: [Header, RouterOutlet, Modal, Login, Register, FooterComponent],
   templateUrl: './user-layout.html',
   styleUrls: ['./user-layout.css'],
 })

@@ -5,6 +5,8 @@ import productRoutes from "./routes/product.routes";
 import cartRouters from "./routes/cart.routes";
 import categoryRoutes from "./routes/category.routes";
 import { userRoutes } from "./routes/user.routes";
+import cors from "cors";
+import express from "express";
 const app = express();
 const PORT = process.env.PORT || 3000;
 

@@ -27,7 +27,7 @@ class ProductController {
         categoryId: categoryId as string,
         subcategoryId: subcategoryId as string,
         brand: brand as string,
-        inStockOnly: inStockOnly === "true" || inStockOnly === true,
+        inStockOnly: inStockOnly === "true"
       };
 
       const { products, metadata } = await this.productService.searchProducts(
