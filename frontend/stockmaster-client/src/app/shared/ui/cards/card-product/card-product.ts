@@ -1,7 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, input,signal,inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Box, LucideAngularModule, Package, ShoppingCart, Tag } from 'lucide-angular';
 import type { Product } from '../../../../core/models/product.model';
 import type { CartItem } from '../../../../core/models/cart.model';
 import { CartService } from '../../../../features/user/cart/services/cart.service';
@@ -12,19 +11,23 @@ interface PriceTypeIcon {
 }
 @Component({
   selector: 'app-card-product',
+
   imports: [RouterLink, LucideAngularModule, CurrencyPipe,ModalCart],
+
   templateUrl: './card-product.html',
   styleUrl: './card-product.css',
 })
 export class CardProduct {
+
     showModal = signal(false);
   cartService = inject(CartService);
 
   readonly ShoppingCart = ShoppingCart;
   readonly Tag = Tag;
   readonly Package = Package;
+
   product = input<Product>();
-  icons = [Package, Tag, Box];
+  icons = ['package', 'tag', 'box'];
 
   priceTypes: PriceTypeIcon[] = [
     { label: 'unit', icon: 'package' },

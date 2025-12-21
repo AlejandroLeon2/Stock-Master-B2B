@@ -14,8 +14,10 @@ export interface Product {
   sku: string;
   name: string;
   searchName: string;
+
   description?: string;
   categoryId?: string;
+  subcategoryId?: string;
   brand?: string;
   prices: Price[];
   unitPerBox?: number;
@@ -26,3 +28,4 @@ export interface Product {
   stockUnits?: number;
   stockBoxes?: number;
 }
+

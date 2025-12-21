@@ -1,5 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
 import { LucideAngularModule, Menu, X, ShoppingCart, User, Search } from 'lucide-angular';
 import { CartService } from '../../../features/user/cart/services/cart.service';
 import { CartPage } from '../../../features/user/cart/pages/cart-page/cart-page';
@@ -7,10 +8,12 @@ import { CartPage } from '../../../features/user/cart/pages/cart-page/cart-page'
 @Component({
   selector: 'app-header',
   imports: [LucideAngularModule, RouterLink, RouterLinkActive, CartPage],
+
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
 export class Header {
+
   readonly MenuIcon = Menu;
   readonly XIcon = X;
   readonly ShoppingCartIcon = ShoppingCart;
@@ -18,6 +21,7 @@ export class Header {
   readonly SearchIcon = Search;
   cartService = inject(CartService);
   showCartModal = signal(false);
+
   isMenuOpen = signal(false);
   isSearchOpen = signal(false);
   cartCount = this.cartService.cartCount;
