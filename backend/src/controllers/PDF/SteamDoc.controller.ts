@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { PDFStorageService } from "../../services/PDF/Storage.service";
 import {pipeline} from "stream/promises"
-import e from "express";
 
 export class SteamDocController {
     
@@ -11,7 +10,7 @@ export class SteamDocController {
     {}
 
     //obtenermos la url del usuario
-    getPdfUrl = async (req: Request, res: Response) => {
+    streamPdf = async (req: Request, res: Response) => {
         try {
             // obtenemos el uid del usuario autenticado
             const userId = req.user?.uid!;
