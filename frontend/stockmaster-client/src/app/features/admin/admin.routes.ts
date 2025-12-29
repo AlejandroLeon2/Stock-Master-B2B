@@ -19,7 +19,7 @@ export const adminRoutes: Routes = [
     },
     {
         path: 'routes',
-        loadComponent: () => import('./routes/pages/routes-page/routes-page').then(m => m.RoutesPage),
+        loadComponent: () => import('./routes/pages/router-page/router-page').then(m => m.RouterPage),
         canActivate: [roleGuard(['admin', 'driver'])]
     },
     {

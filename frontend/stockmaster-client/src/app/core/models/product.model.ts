@@ -8,7 +8,6 @@ export type Price = {
   price: number;
   discounts?: Discount[];
 };
-
 export interface Product {
   id: string;
   sku: string;
