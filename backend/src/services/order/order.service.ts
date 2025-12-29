@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase-admin/firestore";
 import { db } from "../../config/firebase";
 import type {
   CustomResponse as CustomResponseModel,
@@ -34,7 +35,9 @@ export class OrderService {
   }
 
   async getOrderById(id: string) {
-    return this.ordersCollection.doc(id).get();
+    const snapshot = await this.ordersCollection.doc(id).get();
+
+    return snapshot.data();
   }
 
   async getOrdersByUserId(
@@ -119,9 +122,17 @@ export class OrderService {
             });
           }
 
-          const unitPrice =
-            product.prices.find((price) => price.label === item.variant)
-              ?.price || 0;
+          const priceVariant = product.prices.find((price) => price.label === item.variant);
+          let unitPrice = priceVariant?.price || 0;
+
+          // Calcular precio con descuento (B2B Logic)
+          if (priceVariant?.discounts?.length) {
+            const sortedDiscounts = [...priceVariant.discounts].sort((a, b) => b.minQuantity - a.minQuantity);
+            const applicableDiscount = sortedDiscounts.find(d => item.quantity >= d.minQuantity);
+            if (applicableDiscount) {
+              unitPrice = applicableDiscount.price;
+            }
+          }
 
           // 3️. SNAPSHOT DEL ITEM
           orderItems.push({
@@ -165,5 +176,15 @@ export class OrderService {
         errors
       );
     }
+  }
+
+  async updateOrder(orderId: string, order: Order) {
+    const orderRef = this.ordersCollection.doc(orderId);
+    orderRef.update({
+      ...order,
+      updatedAt: Timestamp.now(),
+    });
+
+    return await this.getOrderById(orderId);
   }
 }
