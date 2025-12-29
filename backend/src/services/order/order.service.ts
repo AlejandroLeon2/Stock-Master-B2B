@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase-admin/firestore";
 import { db } from "../../config/firebase";
 import type {
   CustomResponse as CustomResponseModel,
@@ -10,6 +11,7 @@ import {
   OrderDetailItem,
 } from "../../models/order.model";
 import { CustomResponse } from "../../utils/custom-response";
+import { paginateQuery } from "../../utils/pagination";
 import { ProductService } from "../product.service";
 
 export class OrderService {
@@ -19,6 +21,38 @@ export class OrderService {
 
   constructor(productService: ProductService) {
     this.productService = productService;
+  }
+
+  async getOrdersPaginated(params: { page?: number; limit?: number }) {
+    let query = this.ordersCollection.orderBy("createdAt", "desc");
+
+    const { data, metadata } = await paginateQuery<Order>(query, params);
+
+    return {
+      orders: data,
+      metadata,
+    };
+  }
+
+  async getOrderById(id: string) {
+    const snapshot = await this.ordersCollection.doc(id).get();
+
+    return snapshot.data();
+  }
+
+  async getOrdersByUserId(
+    userId: string,
+    params: { page?: number; limit?: number }
+  ) {
+    let query = this.ordersCollection
+      .where("uid", "==", userId)
+      .orderBy("createdAt", "desc");
+    const { data, metadata } = await paginateQuery<Order>(query, params);
+
+    return {
+      orders: data,
+      metadata,
+    };
   }
 
   async createOrder(
@@ -88,9 +122,17 @@ export class OrderService {
             });
           }
 
-          const unitPrice =
-            product.prices.find((price) => price.label === item.variant)
-              ?.price || 0;
+          const priceVariant = product.prices.find((price) => price.label === item.variant);
+          let unitPrice = priceVariant?.price || 0;
+
+          // Calcular precio con descuento (B2B Logic)
+          if (priceVariant?.discounts?.length) {
+            const sortedDiscounts = [...priceVariant.discounts].sort((a, b) => b.minQuantity - a.minQuantity);
+            const applicableDiscount = sortedDiscounts.find(d => item.quantity >= d.minQuantity);
+            if (applicableDiscount) {
+              unitPrice = applicableDiscount.price;
+            }
+          }
 
           // 3️. SNAPSHOT DEL ITEM
           orderItems.push({
@@ -134,5 +176,15 @@ export class OrderService {
         errors
       );
     }
+  }
+
+  async updateOrder(orderId: string, order: Order) {
+    const orderRef = this.ordersCollection.doc(orderId);
+    orderRef.update({
+      ...order,
+      updatedAt: Timestamp.now(),
+    });
+
+    return await this.getOrderById(orderId);
   }
 }
