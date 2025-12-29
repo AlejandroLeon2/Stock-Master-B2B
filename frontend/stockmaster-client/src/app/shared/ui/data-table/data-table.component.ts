@@ -25,10 +25,13 @@ export class GetPropertyPipe implements PipeTransform {
   templateUrl: './data-table.component.html',
 })
 export class DataTableComponent<T> {
-  @Input() data: T[] = [];
-  @Input() columns: TableColumn<T>[] = [];
+    @Input() data: T[] = [];
+    @Input() columns: TableColumn<T>[] = [];
+    @Output() sort = new EventEmitter<SortEvent>();
+    @Output() rowClick = new EventEmitter<T>();
   @Input() isLoading: boolean = false;
-  @Output() sort = new EventEmitter<SortEvent>();
+
+
 
   onSort({ column, direction }: SortEvent) {
     // Reset other headers logic could be added here if we had access to ViewChildren

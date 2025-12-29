@@ -22,6 +22,16 @@ export const adminRoutes: Routes = [
     loadComponent: () => import('./routes/pages/routes-page/routes-page').then((m) => m.RoutesPage),
     canActivate: [roleGuard(['admin', 'driver'])],
   },
+        {
+        path: 'products',
+        loadComponent: () => import('./products/pages/products-list-page/products-list-page').then(m => m.ProductsListPage),
+        canActivate: [roleGuard(['admin'])]
+    },
+          {
+        path: 'categories',
+        loadComponent: () => import('./categories/pages/categories-list-page/categories-list-page').then(m => m.CategoriesListPage),
+        canActivate: [roleGuard(['admin'])]
+    },
   {
     path: 'profile',
     loadComponent: () => import('./profile/profile-page').then((m) => m.ProfilePage),
