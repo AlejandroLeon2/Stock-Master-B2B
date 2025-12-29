@@ -1,14 +1,15 @@
 export type Variant = 'unit' | 'box';
+
 export interface Discount {
   minQuantity: number;
   price: number;
 }
+
 export type Price = {
   label: Variant;
   price: number;
   discounts?: Discount[];
 };
-
 export interface Product {
   id: string;
   sku: string;

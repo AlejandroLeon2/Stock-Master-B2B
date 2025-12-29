@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Modal } from './modal/modal';
+import { ToastComponent } from './shared/ui/toast/toast.component';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, FormsModule, Modal],
+  imports: [CommonModule, RouterOutlet, ToastComponent,FormsModule, Modal],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
