@@ -1,5 +1,6 @@
-import { Component, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { Ellipsis, Eye, FileText, LucideAngularModule, Pencil } from 'lucide-angular';
+import { ORDER_STATUS, OrderStatus } from '../../../../../../core/models/order.model';
 import { ORDER_ACTION, OrderAction } from './order-action.model';
 
 @Component({
@@ -9,6 +10,7 @@ import { ORDER_ACTION, OrderAction } from './order-action.model';
   styleUrl: './order-actions.css',
 })
 export class OrderActions {
+  status = input.required<OrderStatus>();
   actionChange = output<OrderAction>();
 
   isOpen = signal(false);
@@ -18,6 +20,13 @@ export class OrderActions {
   readonly EditIcon = Pencil;
   readonly FileIcon = FileText;
   readonly MoreIcon = Ellipsis;
+
+  readonly generateGuideStatus: OrderStatus[] = [
+    ORDER_STATUS.delivered,
+    ORDER_STATUS.assigned,
+    ORDER_STATUS.inTransit,
+  ];
+  isGenerateGuideAllowed = computed(() => !!this.generateGuideStatus.includes(this.status()));
 
   toggleMenu(event: Event) {
     event.stopPropagation();

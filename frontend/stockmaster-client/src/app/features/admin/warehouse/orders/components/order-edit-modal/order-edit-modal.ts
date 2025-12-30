@@ -29,11 +29,17 @@ export class OrderEditModal {
     status: ['', Validators.required],
   });
 
-  statusOptions = Object.values(ORDER_STATUS);
+  readonly hiddenStatus: OrderStatus[] = [
+    ORDER_STATUS.delivered,
+    ORDER_STATUS.assigned,
+    ORDER_STATUS.inTransit,
+  ];
+  statusOptions = Object.values(ORDER_STATUS).filter(
+    (status) => !this.hiddenStatus.includes(status)
+  );
 
   constructor() {
     effect(() => {
-      console.log(this.order());
       this.editForm.patchValue({
         status: this.order().status,
       });
