@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import  path from "path";
 dotenv.config();
 
 export const env = {
@@ -8,6 +9,7 @@ export const env = {
     privateKey: process.env.PRIVATE_KEY?.replace(/\\n/g, "\n")!,
   },
   googleDrive: {
-    keyfile: process.env.GOOGLE_DRIVE_KEY_PATH!,
+    keyfile: path.join(__dirname, process.env.GOOGLE_DRIVE_KEY_PATH!),
+    folderID: process.env.GOOGLE_DRIVE_FOLDER_ID!
   }
 };

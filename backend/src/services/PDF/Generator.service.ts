@@ -1,16 +1,17 @@
 import PDFDocument from "pdfkit";
 import "pdfkit-table";
+import { Readable } from "stream";
 
 export class PDFGeneratorService {
 
-  createFacturaPDF(datos: { name: string }) {
+  createFacturaPDF(datos: { name: string }): Readable {
     const { name } = datos;
 
     // 1. Crea el documento
     const doc = new PDFDocument({
       size: "A4",
       margin: 50
-    });
+    }) ;
 
     // 2. Escribir el contenido
     doc.fontSize(20).text(`Factura de ${name}`, {
@@ -24,6 +25,6 @@ export class PDFGeneratorService {
     doc.end();
 
     // 4. Devolver el PDF como flujo
-    return doc;
+    return (  doc as unknown) as Readable;
   }
 }

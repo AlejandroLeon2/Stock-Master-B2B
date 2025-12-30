@@ -1,6 +1,8 @@
 import { drive } from "../../config/driveClient";
 import {Readable} from "stream";
 import { db } from "../../config/firebase";
+import { env } from "../../config/env";
+import { file } from "pdfkit";
 
 export class PDFStorageService {
 
@@ -12,11 +14,13 @@ export class PDFStorageService {
             requestBody: {
                 name: filename,
                 mimeType: "application/pdf",
+                parents: [env.googleDrive.folderID]
             },
             media: {
                 mimeType: "application/pdf",
                 body: pdfStream,
             },
+            supportsAllDrives: true
         });
 
         if ( !response.data.id ) {
