@@ -17,7 +17,10 @@
   </div>
 </ng-template>
 <ng-template #actionTemplate let-row>
-  <app-order-actions (actionChange)="onAction($event, row)"></app-order-actions>
+  <app-order-actions
+    [status]="row.status"
+    (actionChange)="onAction($event, row)"
+  ></app-order-actions>
 </ng-template>
 
 @if(isEditModalOpen()) {
