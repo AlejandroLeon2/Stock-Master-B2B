@@ -19,7 +19,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 @Component({
   selector: 'app-cart-page',
-  imports: [LucideAngularModule, CurrencyPipe, JsonPipe, NgClass, CardItemCart, RouterLink],
+  imports: [LucideAngularModule, CurrencyPipe, NgClass, CardItemCart, RouterLink],
   templateUrl: './cart-page.html',
   styleUrl: './cart-page.css',
 })

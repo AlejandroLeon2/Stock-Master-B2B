@@ -2,10 +2,10 @@ import { drive } from "../../config/driveClient";
 import {Readable} from "stream";
 import { db } from "../../config/firebase";
 import { env } from "../../config/env";
+import { FieldValue } from "firebase-admin/firestore";
+import { log } from "console";
 
 export class PDFStorageService {
-
-    constructor () {}
 
     // función para subir el PDF a Google Drive mediande un stream => usando OAuth2
     async sabeDocument(pdfStream: Readable, docID: string, typePdf: string): Promise<{fileID: string}> {
@@ -40,18 +40,34 @@ export class PDFStorageService {
         return { fileID: response.data.id! };
     };
 
+    //funcion para aumentar count de factura o guia en Firestore
+    async increaseCount ( typePdf: "Factura" | "Guia" ): Promise<number> {
+
+        const countField = "valor";
+        // aumentamos el contador en Firestore
+        await db.collection("counters").doc(`${typePdf}`).update({
+            [countField]: FieldValue.increment(1)
+        });
+        // obtenemos el nuevo valor del contador
+        const doc = await db.collection("counters").doc(`${typePdf}`).get();
+        const data = doc.data();
+        const newValue = data ? data[countField] : 0;
+
+        return newValue;
+    };
+
     // función para guardar el ID del archivo en Firestore
-    async SabeId (fileID: string, userId: string): Promise<string> {
+    async SabeId (fileID: string, userId: string, type: string): Promise<string> {
 
         // Guardar en Firestore en la colección "orders"
         await db.collection("orders").doc(userId).update({
-            factura: fileID,
+            [type]: fileID,
         });
         return "ID guardado correctamente";
     };
 
     //funcion para extraer pdfID de Firestore y armar la url para enviarla al cliente por stream
-    async getUrl (orderId: string): Promise<string> {
+    async getUrl (orderId: string, type: string): Promise<string> {
         const doc = await db.collection("orders").doc(orderId).get();
         if( !doc.exists) {
             throw new Error(`Documento ${orderId} no encontrado`);
@@ -61,7 +77,7 @@ export class PDFStorageService {
             throw new Error("Datos no encontrados");
         }
         
-        return data.factura;
+        return data[type];
     }
 
     //funcion conectar por stram el pdf de drive al cliente

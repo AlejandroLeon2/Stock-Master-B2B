@@ -2,30 +2,28 @@ import PDFDocument from "pdfkit";
 import "pdfkit-table";
 import { Readable } from "stream";
 
+   // header: {
+    //   serie: string,
+    //   numero: string,
+    //   fechaEmision: string
+    // },
+    // userData: { 
+    //   ruc: string, name: string, direccion:string,
+    // },
+    // items: Array<{
+    //   descripcion: string,
+    //   cantidad: number,
+    //   precioUnitario: number,
+    // }>,
+    // totals: {
+    //   subTotal: number,
+    //   igv: number,
+    //   total: number,
+    // }
+
 export class PDFGeneratorService {
 
-  createFactura(
-    
-    header: {
-      serie: string,
-      numero: string,
-      fechaEmision: string
-    },
-    userData: { 
-      ruc: string, name: string, direccion:string,
-    },
-    items: Array<{
-      descripcion: string,
-      cantidad: number,
-      precioUnitario: number,
-    }>,
-    totals: {
-      subTotal: number,
-      igv: number,
-      total: number,
-    }
-  ): Readable {
-    const { ruc, name, direccion} = userData;
+  createFactura( ruc: string, name: string, direccion:string, facturaNumber: number, ): Readable {
 
     // 1. Crea el documento
     const doc = new PDFDocument({
@@ -48,9 +46,7 @@ export class PDFGeneratorService {
     return (  doc as unknown) as Readable;
   };
 
-  createGuia(datos: { name: string }): Readable {
-    const { name } = datos;
-
+  createGuia( name: string ): Readable {
     // 1. Crea el documento
     const doc = new PDFDocument({
       size: "A4",

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import orderController from "../controllers/order.controller";
+import pdfController  from "../controllers/PDF/PDF.controller";
 
 const router = Router();
 
-router.post("/", (req, res) => orderController.createOrder(req, res));
+router.post("/", (req, res, next) => orderController.createOrder(req, res, next), (req, res) => pdfController.emitFactura(req, res));
+
 router.get("/", (req, res) => orderController.getOrders(req, res));
 router.get("/:id", (req, res) => orderController.getOrderById(req, res));
 router.get("/user/:userId", (req, res) =>
