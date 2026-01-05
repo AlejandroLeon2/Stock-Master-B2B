@@ -37,7 +37,12 @@ export const environment = {
     storageBucket: '${process.env.FIREBASE_STORAGE_BUCKET_PROD}',
     messagingSenderId: '${process.env.FIREBASE_MESSAGING_SENDER_ID_PROD}',
     appId: '${process.env.FIREBASE_APP_ID_PROD}'
-  }
+  },
+  emailjs: { 
+    serviceId: '${process.env.EMAILJS_SERVICE_ID}',
+    templateId: '${process.env.EMAILJS_TEMPLATE_ID}',
+    publicKey: '${process.env.EMAILJS_PUBLIC_KEY}' 
+    }
 };
 `;
 
@@ -54,7 +59,13 @@ export const environment = {
     storageBucket: '${process.env.FIREBASE_STORAGE_BUCKET_DEV}',
     messagingSenderId: '${process.env.FIREBASE_MESSAGING_SENDER_ID_DEV}',
     appId: '${process.env.FIREBASE_APP_ID_DEV}'
-  }
+  },
+    emailjs: { 
+    serviceId: '${process.env.EMAILJS_SERVICE_ID}',
+    templateId: '${process.env.EMAILJS_TEMPLATE_ID}',
+    publicKey: '${process.env.EMAILJS_PUBLIC_KEY}'
+    }
+
 };
 `;
 
