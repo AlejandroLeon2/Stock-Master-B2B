@@ -40,4 +40,14 @@ export class OrderService {
   updateOrder(id: string, order: Partial<Order>) {
     return this.apiService.put<Order>(`/orders/${id}`, order);
   }
+  getPendingForDelivery(page?: number, limit?: number) {
+  const params: any = {};
+  if (page) params.page = page;
+  if (limit) params.limit = limit;
+  
+  return this.apiService.get<OrdersPaginatedResponse>(
+    '/orders/pending/delivery', 
+    { params }
+  );
+}
 }

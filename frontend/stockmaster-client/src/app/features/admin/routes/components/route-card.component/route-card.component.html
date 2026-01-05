@@ -110,8 +110,8 @@
 
   
 
-  <!-- Orders Checklist (Solo en IN_PROGRESS) -->
-@if (route().status === RouteStatus.IN_PROGRESS && route().orders.length > 0) {
+
+@if ((route().status === RouteStatus.IN_PROGRESS || route().status === RouteStatus.PLANNED) && route().orders.length > 0) {
 <div class="mb-3">
   <button
     (click)="toggleOrders($event)"
@@ -142,7 +142,7 @@
         {{ orderId }}
       </span>
       
-      @if (!isOrderDelivered(orderId)) {
+      @if (!isOrderDelivered(orderId) && route().status === RouteStatus.IN_PROGRESS) {
       <!-- Botón Marcar como Entregado -->
       <button
         (click)="onMarkAsDelivered($event, orderId)"

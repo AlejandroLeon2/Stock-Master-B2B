@@ -8,7 +8,8 @@ import {
   Order,
   ORDER_STATUS,
   ORDER_VARIANT,
-  OrderDetailItem, OrderStatus
+  OrderDetailItem,
+  OrderStatus,
 } from "../../models/order.model";
 import { Product } from "../../models/product.model";
 import { CustomResponse } from "../../utils/custom-response";
@@ -226,5 +227,18 @@ export class OrderService {
     await docRef.update({ ...data, updatedAt: Date.now() });
     const snapshot = await docRef.get();
     return snapshot.data() as Order;
+  }
+  
+  async getOrdersPendingForDelivery(params: { page?: number; limit?: number }) {
+    let query = this.ordersCollection
+      .where("status", "in", [ ORDER_STATUS.ready])
+      .orderBy("createdAt", "desc");
+
+    const { data, metadata } = await paginateQuery<Order>(query, params);
+
+    return {
+      orders: data,
+      metadata,
+    };
   }
 }

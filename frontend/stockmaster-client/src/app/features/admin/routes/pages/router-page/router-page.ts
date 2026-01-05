@@ -114,18 +114,19 @@ export class RouterPage implements OnInit {
       });
   }
 
+ 
   private async loadOrders(): Promise<void> {
-    try {
-      const response = await this.ordersService.getOrders().toPromise();
-      if (response?.data?.orders) {
-        this.orders.set(response.data.orders);
-        console.log('✅ Orders loaded:', response.data.orders.length);
-      }
-    } catch (error) {
-      console.error('❌ Error loading orders:', error);
-      throw error;
+  try {
+    const response = await this.ordersService.getPendingForDelivery().toPromise();
+    if (response?.data?.orders) {
+      this.orders.set(response.data.orders);
+      console.log('✅ Pending orders loaded:', response.data.orders.length);
     }
+  } catch (error) {
+    console.error('❌ Error loading pending orders:', error);
+    throw error;
   }
+}
 
   private async loadDrivers(): Promise<void> {
     try {
