@@ -1,24 +1,21 @@
-import { Component, signal, computed } from '@angular/core';
-import { Router } from '@angular/router';
-import { MapRouter } from '../../components/map-router/map-router';
-import { 
-  LucideAngularModule, 
-  Users, 
-  Package, 
-  Truck, 
-  MapPin, 
-  Eye, 
-  UserPlus,
-  ChevronRight,
-  ShoppingBag
-} from 'lucide-angular';
-import type {
-  Driver,
-  Order,
-  Route,
-  Delivery,
-  OrderStatus,
-} from '../../../../../core/models/route.model';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LucideAngularModule, Users, Package, Plus, Route as RouteIcon } from 'lucide-angular';
+import { DriversService } from '../../services/drivers.service';
+import { RoutesService } from '../../services/routes.service';
+import { Driver, DriverStatus } from '../../../../../core/models/driver.model';
+import { Route, RouteStatus } from '../../../../../core/models/route.model';
+import { Order, OrderStatus, ORDER_STATUS } from '../../../../../core/models/order.model';
+import { Delivery } from '../../../../../core/models/delivery.model';
+import { DriverCardComponent } from '../../components/driver-card.component/driver-card.component';
+import { OrderCardComponent } from '../../components/order-card.component/order-card.component';
+import { RouteCardComponent } from '../../components/route-card.component/route-card.component';
+import { MapRouterComponent } from '../../components/map-router.component/map-router.component';
+import { OrderService } from '../../../../../core/services/order/order';
+import { AssignRouteModal } from '../../components/assign-route-modal/assign-route-modal';
+import { WAREHOUSE_LOCATION } from '../../config/location';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { CreateRouteModal } from '../../components/create-route-modal/create-route-modal';
 
 type TabKey = 'drivers' | 'orders' | 'routes';
 
@@ -28,486 +25,412 @@ interface Tab {
   icon: any;
 }
 
-interface MapFilter {
-  type: 'all' | 'driver' | 'order' | 'route';
-  id?: string;
-}
 @Component({
   selector: 'app-router-page',
-  imports: [LucideAngularModule, MapRouter],
+  standalone: true,
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    DriverCardComponent,
+    OrderCardComponent,
+    RouteCardComponent,
+    MapRouterComponent,
+    AssignRouteModal,
+    CreateRouteModal,
+  ],
   templateUrl: './router-page.html',
   styleUrl: './router-page.css',
 })
-export class RouterPage {
-   UsersIcon = Users;
-  PackageIcon = Package;
-  TruckIcon = Truck;
-  MapPinIcon = MapPin;
-  EyeIcon = Eye;
-  UserPlusIcon = UserPlus;
-  ChevronRightIcon = ChevronRight;
-  ShoppingBagIcon = ShoppingBag;
+export class RouterPage implements OnInit {
+  private driversService = inject(DriversService);
+  private routesService = inject(RoutesService);
+  private ordersService = inject(OrderService);
+  private toastService = inject(ToastService);
 
-  // State
   activeTab = signal<TabKey>('drivers');
-  mapFilter = signal<MapFilter>({ type: 'all' });
   selectedDriverId = signal<string | null>(null);
   selectedOrderId = signal<string | null>(null);
   selectedRouteId = signal<string | null>(null);
+  deliveredOrdersMap = signal<Map<string, Set<string>>>(new Map());
+  showCreateRouteModal = signal(false);
+  readonly PlusIcon = Plus;
+  drivers = signal<Driver[]>([]);
+  orders = signal<Order[]>([]);
+  routes = signal<Route[]>([]);
+  deliveries = signal<Delivery[]>([]);
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+  showAssignModal = signal(false);
+  readonly WAREHOUSE_LOCATION = WAREHOUSE_LOCATION;
 
+  // Tabs
   tabs: Tab[] = [
     { key: 'drivers', label: 'Conductores', icon: Users },
     { key: 'orders', label: 'Pedidos', icon: Package },
-    { key: 'routes', label: 'Rutas', icon: Truck },
+    { key: 'routes', label: 'Rutas', icon: RouteIcon },
   ];
-  constructor(private router: Router) {}
-  drivers = signal<Driver[]>([
-    {
-      companyName: 'Agua Pura SAC',
-      contactName: 'Luis Fernández',
-      displayName: 'Luis Fernández',
-      email: 'luis.fernandez@aguapura.com',
-      role: 'driver',
-      isActive: true,
-      ruc: '20123456789',
-      uid: 'UID-DRIVER-001',
-      orders: ['ORD-001', 'ORD-002'],
-      assignedRoute: 'R-001',
-      status: 'ON_ROUTE'
-    },
-    {
-      companyName: 'Distribuciones Lima',
-      contactName: 'María Torres',
-      displayName: 'María Torres',
-      email: 'maria.torres@distribuciones.com',
-      role: 'driver',
-      isActive: true,
-      ruc: '20987654321',
-      uid: 'UID-DRIVER-002',
-      orders: [],
-      assignedRoute: null,
-      status: 'AVAILABLE'
-    },
-    {
-      companyName: 'Logística Express',
-      contactName: 'Jorge Ramírez',
-      displayName: 'Jorge Ramírez',
-      email: 'jorge.ramirez@logexpress.com',
-      role: 'driver',
-      isActive: true,
-      ruc: '20876543210',
-      uid: 'UID-DRIVER-003',
-      orders: ['ORD-003'],
-      assignedRoute: 'R-003',
-      status: 'ON_ROUTE'
-    },
-  ]);
 
-  routes = signal<Route[]>([
-    {
-      id: 'R-001',
-      name: 'Ruta Lince Norte',
-      driverId: 'DRV-001',
-      orders: [
-        {
-          id: 'ORD-001',
-          deliveryId: 'DEL-001',
-          createdAt: Date.now(),
-          delivered: false,
-          customer: {
-            companyName: 'REAL SERVICE',
-            contactName: 'Especialistas en bidón de agua mineral',
-            phone: '444444444',
-            email: 'cliente1@empresa.com',
-          },
-          items: [
-            {
-              brand: 'BoomSound',
-              id: '94VO79h8vkTCIq2ktx3P',
-              imageUrl:
-                'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-              name: 'Altavoz Bluetooth Portátil',
-              quantity: 3,
-              sku: 'SPK-BT-2024-012',
-              subTotal: 209.97,
-              unitPerBox: 12,
-              unitPrice: 69.99,
-              variant: 'unit',
-            },
-          ],
-          deliveryAddress: {
-            street: 'Av. Francisco Lazo 2352',
-            district: 'Lince',
-            city: 'Lima',
-            postalCode: '15046',
-            location: { lat: -12.082228, lng: -77.03599 },
-          },
-          status: 'CREATED',
-        },
-      ],
-      districts: ['Lince'],
-      status: 'PLANNED',
-      createdAt: Date.now(),
-    }
-  ]);
-
-  orders = signal<Order[]>([
-    {
-      id: 'ORD-001',
-      deliveryId: 'DEL-001',
-      createdAt: Date.now(),
-      delivered: false,
-      customer: {
-        companyName: 'REAL SERVICE',
-        contactName: 'Especialistas en bidón de agua mineral',
-        phone: '444444444',
-        email: 'cliente1@empresa.com',
-      },
-      items: [
-        {
-          brand: 'BoomSound',
-          id: '94VO79h8vkTCIq2ktx3P',
-          imageUrl:
-            'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-          name: 'Altavoz Bluetooth Portátil',
-          quantity: 3,
-          sku: 'SPK-BT-2024-012',
-          subTotal: 209.96999999999997,
-          unitPerBox: 12,
-          unitPrice: 69.99,
-          variant: 'unit',
-        },
-        {
-          brand: 'BoomSound',
-          id: '94VO79h8vkTCIq2ktx3P',
-          imageUrl:
-            'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-          name: 'Altavoz Bluetooth Portátil',
-          quantity: 1,
-          sku: 'SPK-BT-2024-012',
-          subTotal: 630,
-          unitPerBox: 12,
-          unitPrice: 630,
-          variant: 'box',
-        },
-      ],
-      deliveryAddress: {
-        street: 'Av. Francisco Lazo 2352',
-        district: 'Lince',
-        city: 'Lima',
-        postalCode: '15046',
-        location: {
-          lat: -12.082228,
-          lng: -77.03599,
-        },
-      },
-      status: 'CREATED',
-    },
-    {
-      id: 'ORD-002',
-      deliveryId: 'DEL-002',
-      createdAt: Date.now(),
-      delivered: false,
-      customer: {
-        companyName: 'Cliente Arenales',
-        contactName: 'Sucursal Norte',
-        phone: '555555555',
-        email: 'cliente2@empresa.com',
-      },
-      items: [
-        {
-          brand: 'BoomSound',
-          id: '94VO79h8vkTCIq2ktx3P',
-          imageUrl:
-            'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-          name: 'Altavoz Bluetooth Portátil',
-          quantity: 3,
-          sku: 'SPK-BT-2024-012',
-          subTotal: 209.96999999999997,
-          unitPerBox: 12,
-          unitPrice: 69.99,
-          variant: 'unit',
-        },
-        {
-          brand: 'BoomSound',
-          id: '94VO79h8vkTCIq2ktx3P',
-          imageUrl:
-            'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-          name: 'Altavoz Bluetooth Portátil',
-          quantity: 1,
-          sku: 'SPK-BT-2024-012',
-          subTotal: 630,
-          unitPerBox: 12,
-          unitPrice: 630,
-          variant: 'box',
-        },
-      ],
-      deliveryAddress: {
-        street: 'Av. Gral. Juan Antonio Álvarez de Arenales 2418',
-        district: 'Lince',
-        city: 'Lima',
-        postalCode: '15073',
-        location: {
-          lat: -12.086964,
-          lng: -77.030005,
-        },
-      },
-      status: 'CREATED',
-    },
-    {
-      id: 'ORD-003',
-      deliveryId: 'DEL-003',
-      createdAt: Date.now(),
-      delivered: false,
-      customer: {
-        companyName: 'Cliente Arenales Sur',
-        contactName: 'Sucursal Sur',
-        phone: '666666666',
-        email: 'cliente3@empresa.com',
-      },
-      items: [
-        {
-          brand: 'BoomSound',
-          id: '94VO79h8vkTCIq2ktx3P',
-          imageUrl:
-            'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop',
-          name: 'Altavoz Bluetooth Portátil',
-          quantity: 3,
-          sku: 'SPK-BT-2024-012',
-          subTotal: 209.96999999999997,
-          unitPerBox: 12,
-          unitPrice: 69.99,
-          variant: 'unit',
-        },
-      ],
-      deliveryAddress: {
-        street: 'Av. Arenales',
-        district: 'Lince',
-        city: 'Lima',
-        postalCode: '15073',
-        location: {
-          lat: -12.088397,
-          lng: -77.035225,
-        },
-      },
-      status: 'CREATED',
-    },
-  ]);
-  entregas = signal<Delivery[]>([
-    {
-      id: 'DEL-001',
-      orderId: 'ORD-001',
-      driverId: 'driver_001',
-      driverName: 'Carlos Vega',
-      routeId: 'R-001',
-      startedAt: 1766438201425,
-      currentLocation: {
-        lat: -12.082228,
-        lng: -77.03599,
-      },
-      status: 'DELIVERED',
-      deliveredAt: null,
-    },
-    {
-      id: 'DEL-002',
-      orderId: 'ORD-002',
-      driverId: 'driver_002',
-      driverName: 'Ana Torres',
-      routeId: 'R-002',
-      startedAt: 1766438201425,
-      currentLocation: {
-        lat: -12.086964,
-        lng: -77.030005,
-      },
-
-      status: 'ON_ROUTE',
-      deliveredAt: null,
-    },
-    {
-      id: 'DEL-003',
-      orderId: 'ORD-003',
-      driverId: 'driver_003',
-      driverName: 'Jorge Ramírez',
-      routeId: 'R-003',
-      startedAt: 1766438201425,
-      currentLocation: {
-        lat: -12.088397,
-        lng: -77.035225,
-      },
-
-      status: 'ON_ROUTE',
-      deliveredAt: null,
-    },
-  ]);
-
-   filteredDrivers = computed(() => {
-    const filter = this.mapFilter();
-    if (filter.type === 'all') return this.drivers();
-    if (filter.type === 'driver' && filter.id) {
-      return this.drivers().filter(d => d.uid === filter.id);
-    }
-    if (filter.type === 'route' && filter.id) {
-      const route = this.routes().find(r => r.id === filter.id);
-      if (route) {
-        return this.drivers().filter(d => d.uid === route.driverId);
-      }
-    }
-    return [];
+  // Computed - Filtered data for map
+  filteredDrivers = computed(() => {
+    const selectedId = this.selectedDriverId();
+    return selectedId ? this.drivers().filter((d) => d.id === selectedId) : this.drivers();
   });
 
   filteredOrders = computed(() => {
-    const filter = this.mapFilter();
-    if (filter.type === 'all') return this.orders();
-    if (filter.type === 'order' && filter.id) {
-      return this.orders().filter(o => o.id === filter.id);
-    }
-    if (filter.type === 'route' && filter.id) {
-      const route = this.routes().find(r => r.id === filter.id);
-      return route?.orders || [];
-    }
-    if (filter.type === 'driver' && filter.id) {
-      const driver = this.drivers().find(d => d.uid === filter.id);
-      return this.orders().filter(o => driver?.orders.includes(o.id));
-    }
-    return [];
+    const selectedId = this.selectedOrderId();
+    return selectedId ? this.orders().filter((o) => o.id === selectedId) : this.orders();
+  });
+
+  filteredRoutes = computed(() => {
+    const selectedId = this.selectedRouteId();
+    return selectedId ? this.routes().filter((r) => r.id === selectedId) : this.routes();
   });
 
   filteredEntregas = computed(() => {
-    const filter = this.mapFilter();
-    if (filter.type === 'all') return this.entregas();
-    if (filter.type === 'route' && filter.id) {
-      return this.entregas().filter(e => e.routeId === filter.id);
-    }
-    if (filter.type === 'driver' && filter.id) {
-      return this.entregas().filter(e => e.driverId === filter.id);
-    }
-    return [];
+    const selectedRouteId = this.selectedRouteId();
+    return selectedRouteId
+      ? this.deliveries().filter((d) => d.routeId === selectedRouteId)
+      : this.deliveries();
   });
 
-  // Methods
-  getInitials(name: string): string {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  ngOnInit(): void {
+    this.loadAllData();
   }
 
-  getTotalItemsCount(order: Order): number {
-    return order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  /**
+   * ✅ Cargar todos los datos con manejo de errores mejorado
+   */
+  private loadAllData(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    Promise.all([this.loadDrivers(), this.loadRoutes(), this.loadOrders()])
+      .catch((error) => {
+        console.error('Error loading data:', error);
+        this.error.set('Error al cargar los datos. Por favor, intenta de nuevo.');
+      })
+      .finally(() => {
+        this.loading.set(false);
+      });
   }
 
-  getDriverStatusClass(status: Driver['status']): string {
-    const classes = {
-      'AVAILABLE': 'bg-green-100 text-green-700',
-      'ON_ROUTE': 'bg-blue-100 text-blue-700',
-      'INACTIVE': 'bg-gray-100 text-gray-500'
-    };
-    return classes[status || 'AVAILABLE'];
+  private async loadOrders(): Promise<void> {
+    try {
+      const response = await this.ordersService.getOrders().toPromise();
+      if (response?.data?.orders) {
+        this.orders.set(response.data.orders);
+        console.log('✅ Orders loaded:', response.data.orders.length);
+      }
+    } catch (error) {
+      console.error('❌ Error loading orders:', error);
+      throw error;
+    }
   }
 
-  getDriverStatusLabel(status: Driver['status']): string {
-    const labels = {
-      'AVAILABLE': 'Disponible',
-      'ON_ROUTE': 'En ruta',
-      'INACTIVE': 'Inactivo'
-    };
-    return labels[status || 'AVAILABLE'];
+  private async loadDrivers(): Promise<void> {
+    try {
+      const response = await this.driversService.getAll().toPromise();
+      if (response?.data) {
+        this.drivers.set(response.data);
+        console.log('✅ Drivers loaded:', response.data.length);
+      }
+    } catch (error) {
+      console.error('❌ Error loading drivers:', error);
+      throw error;
+    }
+  }
+  private async loadRoutes(): Promise<void> {
+    try {
+      const response = await this.routesService.getAll().toPromise();
+      if (response?.data) {
+        this.routes.set(response.data);
+        console.log('✅ Routes loaded:', response.data.length);
+      }
+    } catch (error) {
+      console.error('❌ Error loading routes:', error);
+      throw error;
+    }
   }
 
-  getOrderStatusClass(status: OrderStatus): string {
-    const classes: Record<OrderStatus, string> = {
-      CREATED: 'bg-gray-100 text-gray-700',
-      ASSIGNED: 'bg-blue-100 text-blue-700',
-      ON_ROUTE: 'bg-green-100 text-green-700',
-      DELIVERED: 'bg-green-200 text-green-800',
-      FAILED: 'bg-red-100 text-red-700',
-    };
-    return classes[status];
-  }
-
-  getOrderStatusLabel(status: OrderStatus): string {
-    const labels: Record<OrderStatus, string> = {
-      CREATED: 'Creado',
-      ASSIGNED: 'Asignado',
-      ON_ROUTE: 'En ruta',
-      DELIVERED: 'Entregado',
-      FAILED: 'Fallido',
-    };
-    return labels[status];
-  }
-
-  getRouteStatusClass(status: Route['status']): string {
-    const classes = {
-      'PLANNED': 'bg-yellow-100 text-yellow-700',
-      'IN_PROGRESS': 'bg-blue-100 text-blue-700',
-      'COMPLETED': 'bg-green-100 text-green-700'
-    };
-    return classes[status];
-  }
-
-  getRouteStatusLabel(status: Route['status']): string {
-    const labels = {
-      'PLANNED': 'Planificada',
-      'IN_PROGRESS': 'En progreso',
-      'COMPLETED': 'Completada'
-    };
-    return labels[status];
-  }
-
-  // Actions - Drivers
   onDriverClick(driverId: string): void {
-    this.selectedDriverId.set(driverId);
-    this.mapFilter.set({ type: 'driver', id: driverId });
+    this.selectedDriverId.set(this.selectedDriverId() === driverId ? null : driverId);
   }
 
-  assignRouteToDriver(driverId: string): void {
-    console.log('Asignar ruta al conductor:', driverId);
-    // Aquí implementarías la lógica para asignar ruta
-    // Podrías abrir un modal o navegar a otra página
-  }
-
-  // Actions - Orders
   onOrderClick(orderId: string): void {
-    this.selectedOrderId.set(orderId);
-    this.mapFilter.set({ type: 'order', id: orderId });
+    this.selectedOrderId.set(this.selectedOrderId() === orderId ? null : orderId);
   }
 
-  viewOrderDetails(orderId: string): void {
-    this.router.navigate(['/orders', orderId]);
-  }
-
-  assignOrderToRoute(orderId: string): void {
-    console.log('Asignar pedido a ruta:', orderId);
-    // Implementar lógica de asignación
-  }
-
-  // Actions - Routes
   onRouteClick(routeId: string): void {
-    this.selectedRouteId.set(routeId);
-    this.mapFilter.set({ type: 'route', id: routeId });
+    this.selectedRouteId.set(this.selectedRouteId() === routeId ? null : routeId);
+  }
+
+  //asignacion de ruta
+  async assignOrderToRoute(orderId: string): Promise<void> {
+    this.selectedOrderId.set(orderId);
+    this.showAssignModal.set(true);
+  }
+
+  onRouteSelected(routeId: string) {
+    const orderId = this.selectedOrderId();
+    if (!orderId) return;
+    this.routesService.addOrderToRoute(routeId, orderId, this.WAREHOUSE_LOCATION).subscribe({
+      next: (res) => {
+        console.log('✅ Orden asignada', res.data);
+        this.showAssignModal.set(false);
+        this.onOrderChangeStatus({ orderId: orderId, status: ORDER_STATUS.assigned });
+      },
+      error: (err) => console.error('❌ Error', err),
+    });
+  }
+
+  onRemoveOrderFromRoute(routeId: string, orderId: string) {
+    this.routesService.removeOrderFromRoute(routeId, orderId, this.WAREHOUSE_LOCATION).subscribe({
+      next: (res) => console.log('🗑️ Orden removida', res.data),
+      error: (err) => console.error('❌ Error al remover', err),
+    });
+  }
+
+  closeAssignModal() {
+    this.showAssignModal.set(false);
+  }
+
+  async assignDriverToRoute(routeId: string): Promise<void> {
+    console.log('Assign driver to route:', routeId);
+    // TODO: Implementar lógica
   }
 
   viewRouteDetails(routeId: string): void {
-    this.router.navigate(['/routes', routeId]);
+    console.log('View route details:', routeId);
+    // TODO: Implementar navegación o modal
   }
 
-  assignDriverToRoute(routeId: string): void {
-    console.log('Asignar conductor a ruta:', routeId);
-    // Implementar lógica de asignación
-  }
-
-  // Reset filter
   resetMapFilter(): void {
-    this.mapFilter.set({ type: 'all' });
     this.selectedDriverId.set(null);
     this.selectedOrderId.set(null);
     this.selectedRouteId.set(null);
   }
 
-  // Helper para saber si hay filtro activo
   hasActiveFilter(): boolean {
-    return this.mapFilter().type !== 'all';
+    return !!(this.selectedDriverId() || this.selectedOrderId() || this.selectedRouteId());
+  }
+
+  refreshData(): void {
+    this.loadAllData();
+  }
+  getInitials(name: string): string {
+    return (
+      name
+        ?.split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2) || '??'
+    );
+  }
+
+  getTotalItemsCount(order: Order): number {
+    return order.items.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  getDeliveredOrders(routeId: string): Set<string> {
+    const route = this.routes().find((r) => r.id === routeId);
+    return new Set(route?.deliveredOrders || []);
+  }
+
+  async onDriverChangeStatus(data: { driverId: string; status: DriverStatus }): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await this.driversService
+        .update(data.driverId, {
+          status: data.status,
+        })
+        .toPromise();
+
+      if (response?.success) {
+        console.log('✅ Driver status updated');
+        await this.loadDrivers();
+      }
+    } catch (error) {
+      console.error('❌ Error updating driver status:', error);
+      this.toastService.error('Error al cambiar el estado del pedido');
+      this.error.set('Error al cambiar el estado del conductor');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+  async onOrderChangeStatus(data: { orderId: string; status: OrderStatus }): Promise<void> {
+    try {
+      this.loading.set(true);
+
+      const response = await this.ordersService
+        .updateOrderStatus(data.orderId, data.status)
+        .toPromise();
+      this.toastService.success('Estado del pedido cambiado correctamente');
+      await this.loadOrders();
+    } catch (error) {
+      this.toastService.error('Error al cambiar el estado del pedido');
+      this.error.set('Error al cambiar el estado del pedido');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async onOrderCancel(data: { orderId: string; status: OrderStatus }): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await this.ordersService
+        .updateOrderStatus(data.orderId, data.status)
+        .toPromise();
+      await this.loadOrders();
+      this.toastService.success('Orden cancelada correctamente');
+    } catch (error) {
+      this.toastService.error('Error al cancelar la orden');
+      this.error.set('Error al cancelar el pedido');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async onRouteStart(routeId: string): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await this.routesService
+        .updateStatus(routeId, RouteStatus.IN_PROGRESS)
+        .toPromise();
+
+      if (response?.success) {
+        this.toastService.success('Ruta iniciada correctamente');
+        await this.loadRoutes();
+      }
+    } catch (error) {
+      this.toastService.error('Error al comenzar la ruta');
+      this.error.set('Error al iniciar la ruta');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async onRouteComplete(routeId: string): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await this.routesService
+        .updateStatus(routeId, RouteStatus.COMPLETED)
+        .toPromise();
+
+      if (response?.success) {
+        this.toastService.success('Ruta completa correctamente');
+        await this.loadRoutes();
+      }
+    } catch (error) {
+      this.toastService.error('Error al marcar como completado');
+      this.error.set('Error al completar la ruta');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async onRouteCancel(routeId: string): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await this.routesService
+        .updateStatus(routeId, RouteStatus.CANCELLED)
+        .toPromise();
+
+      if (response?.success) {
+        this.toastService.success('Ruta cancelada correctamente');
+        await this.loadRoutes();
+      }
+    } catch (error) {
+      this.toastService.error('Error a cancelar la ruta');
+      this.error.set('Error al cancelar la ruta');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async onRouteToggleOrderDelivered(data: { routeId: string; orderId: string }): Promise<void> {
+    const currentMap = new Map(this.deliveredOrdersMap());
+    const routeOrders = currentMap.get(data.routeId) || new Set();
+
+    if (routeOrders.has(data.orderId)) {
+      routeOrders.delete(data.orderId);
+    } else {
+      routeOrders.add(data.orderId);
+    }
+
+    currentMap.set(data.routeId, routeOrders);
+    this.deliveredOrdersMap.set(currentMap);
+  }
+
+  onMarkOrderDelivered(event: { routeId: string; orderId: string }): void {
+    this.routesService.markOrderAsDelivered(event.routeId, event.orderId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.routes.update((routes) =>
+            routes.map((route) => {
+              if (route.id === event.routeId) {
+                const deliveredOrders = [...(route.deliveredOrders || []), event.orderId];
+                return { ...route, deliveredOrders };
+              }
+              return route;
+            })
+          );
+          this.toastService.success('Orden marcada como entregada correctamente');
+        }
+      },
+      error: (error) => {
+        this.toastService.error('Ocurrió un error al marcar pedido como entregado');
+      },
+    });
+  }
+
+  onRemoveOrder(event: { routeId: string; orderId: string }): void {
+    this.routesService.removeOrder(event.routeId, event.orderId, WAREHOUSE_LOCATION).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.routes.update((routes) =>
+            routes.map((route) => {
+              if (route.id === event.routeId) {
+                return {
+                  ...route,
+                  orders: route.orders.filter((id) => id !== event.orderId),
+                  deliveredOrders: route.deliveredOrders?.filter((id) => id !== event.orderId),
+                };
+              }
+              return route;
+            })
+          );
+          this.toastService.success('Orden removida correctamente');
+        }
+      },
+      error: (error) => {
+        this.toastService.error('Ocurrió un error al remover la orden');
+      },
+    });
+  }
+  onCreateRoute(data: { driverId: string; orderIds: string[] }): void {
+    this.loading.set(true);
+
+    this.routesService
+      .createOptimized({
+        driverId: data.driverId,
+        orderIds: data.orderIds,
+        startLocation: this.WAREHOUSE_LOCATION,
+      })
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.toastService.success('Ruta creada exitosamente');
+            this.showCreateRouteModal.set(false);
+            this.loadRoutes();
+            this.loadOrders();
+          }
+        },
+        error: (err) => {
+          this.toastService.error('Error al crear la ruta');
+          console.error('Error:', err);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 }
