@@ -28,8 +28,7 @@ class OrderController {
       }
 
       const createOrderResponse = await this.orderService.createOrder(req.body);
-      const status = createOrderResponse.success ? 201 : 400;
-      res.status(status).json(createOrderResponse);
+      res.status(201).json(createOrderResponse);
     } catch (error) {
       console.log(error);
       res

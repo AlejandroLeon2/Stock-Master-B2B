@@ -119,6 +119,8 @@ export class OrderService {
               details: {
                 item: {
                   ...item,
+                  name: product.name,
+                  imageUrl: product.images?.[0],
                   stockUnits: product.stockUnits,
                   stockBoxes: product.stockBoxes,
                 },
