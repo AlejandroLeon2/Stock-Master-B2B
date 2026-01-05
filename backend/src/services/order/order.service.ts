@@ -8,7 +8,7 @@ import {
   Order,
   ORDER_STATUS,
   ORDER_VARIANT,
-  OrderDetailItem,
+  OrderDetailItem, OrderStatus
 } from "../../models/order.model";
 
 import { CustomResponse } from "../../utils/custom-response";
@@ -123,13 +123,19 @@ export class OrderService {
             });
           }
 
-          const priceVariant = product.prices.find((price) => price.label === item.variant);
+          const priceVariant = product.prices.find(
+            (price) => price.label === item.variant
+          );
           let unitPrice = priceVariant?.price || 0;
 
           // Calcular precio con descuento (B2B Logic)
           if (priceVariant?.discounts?.length) {
-            const sortedDiscounts = [...priceVariant.discounts].sort((a, b) => b.minQuantity - a.minQuantity);
-            const applicableDiscount = sortedDiscounts.find(d => item.quantity >= d.minQuantity);
+            const sortedDiscounts = [...priceVariant.discounts].sort(
+              (a, b) => b.minQuantity - a.minQuantity
+            );
+            const applicableDiscount = sortedDiscounts.find(
+              (d) => item.quantity >= d.minQuantity
+            );
             if (applicableDiscount) {
               unitPrice = applicableDiscount.price;
             }
@@ -187,5 +193,15 @@ export class OrderService {
     });
 
     return await this.getOrderById(orderId);
+  }
+
+  async updateStatus(id: string, status: OrderStatus): Promise<Order> {
+    return this.update(id, { status });
+  }
+  async update(id: string, data: Partial<Order>): Promise<Order> {
+    const docRef = this.ordersCollection.doc(id);
+    await docRef.update({ ...data, updatedAt: Date.now() });
+    const snapshot = await docRef.get();
+    return snapshot.data() as Order;
   }
 }
