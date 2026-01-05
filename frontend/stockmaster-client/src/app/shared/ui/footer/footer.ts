@@ -5,8 +5,8 @@ import { RouterModule } from '@angular/router';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import emailjs from '@emailjs/browser';
-import { ModalService } from '../modal/modal.service';
-import { environment } from '../../environments/environment';
+import { ModalService } from '../modal-footer/modal.service';
+import { environment } from '../../../../environments/environment';
 import { LucideAngularModule, Mail, Phone, MapPin, Send, ChevronRight } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 
@@ -36,7 +36,7 @@ export class Footer {
 
   // Enlaces de navegación
   quickLinks = [
-    { label: 'Inicio', route: '/' },
+    { label: 'Inicio', route: '/shop/home' },
     { label: 'Productos', route: '/shop/catalog' },    
     { label: 'Sobre Nosotros', action: 'about' },
   ];

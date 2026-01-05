@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Modal } from './modal/modal';
+import { Modal } from './shared/ui/modal-footer/modal';
 import { ToastComponent } from './shared/ui/toast/toast.component';
 
 @Component({

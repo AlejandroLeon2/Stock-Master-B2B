@@ -146,6 +146,32 @@ class OrderController {
       res.status(400).json({ success: false, error: error.message });
     }
   }
+  async getPendingForDelivery(req: Request, res: Response) {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    
+    const result = await this.orderService.getOrdersPendingForDelivery({
+      page,
+      limit,
+    });
+    
+    res.status(200).json(
+      CustomResponse.success(
+        result,
+        "Pedidos pendientes obtenidos exitosamente"
+      )
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(
+      CustomResponse.error(
+        "ORDER_ERROR",
+        "Error al obtener pedidos pendientes"
+      )
+    );
+  }
+}
 
 }
 

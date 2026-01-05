@@ -57,7 +57,7 @@ export class CreateRouteModal {
         if (res.data?.orders) {
           // Filtrar solo pedidos READY
           const readyOrders = res.data.orders.filter(
-            (o) => o.status === ORDER_STATUS.ready || o.status === ORDER_STATUS.inPacking
+            (o) => o.status === ORDER_STATUS.ready
           );
           this.availableOrders.set(readyOrders);
         }

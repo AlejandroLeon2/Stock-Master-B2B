@@ -202,7 +202,7 @@ export class RoutesService {
     });
 
     const updatePromises = optimizedOrderIds.map((orderId) =>
-      db.collection(COLLECTIONS.ORDERS).doc(orderId).update({ status: "READY" })
+      db.collection(COLLECTIONS.ORDERS).doc(orderId).update({ status: "ASSIGNED" })
     );
     await Promise.all(updatePromises);
 
@@ -364,54 +364,30 @@ export class RoutesService {
     } as Route);
   }
 
-  async removeOrder(
-    routeId: string,
-    orderId: string,
-    startLocation: { lat: number; lng: number }
-  ): Promise<RouteParsed> {
-    console.log(`🗑️ Removing order ${orderId} from route ${routeId}`);
+async removeOrder(
+  routeId: string,
+  orderId: string,
+  startLocation: { lat: number; lng: number }
+): Promise<RouteParsed> {
+  const doc = await db.collection(this.collection).doc(routeId).get();
+  if (!doc.exists) throw new Error("Ruta no encontrada");
 
-    const doc = await db.collection(this.collection).doc(routeId).get();
-    if (!doc.exists) {
-      throw new Error("Ruta no encontrada");
-    }
-    const route = { id: doc.id, ...doc.data() } as Route;
+  const route = { id: doc.id, ...doc.data() } as Route;
 
-    if (route.status === "COMPLETED") {
-      throw new Error("No se puede modificar una ruta completada");
-    }
+  if (route.status === "COMPLETED") {
+    throw new Error("No se puede modificar una ruta completada");
+  }
 
-    if (!route.orders.includes(orderId)) {
-      throw new Error("El pedido no está asignado a esta ruta");
-    }
+  if (!route.orders.includes(orderId)) {
+    throw new Error("El pedido no está asignado a esta ruta");
+  }
 
-    const remainingOrderIds = route.orders.filter((id) => id !== orderId);
+  const remainingOrderIds = route.orders.filter((id) => id !== orderId);
 
-    if (remainingOrderIds.length === 0) {
-      await db
-        .collection(this.collection)
-        .doc(routeId)
-        .update({
-          orders: [],
-          geometry: JSON.stringify({ type: "LineString", coordinates: [] }),
-          updatedAt: Date.now(),
-        });
+  let newOrders: string[] = [];
+  let geometryString = JSON.stringify({ type: "LineString", coordinates: [] });
 
-      await db.collection(COLLECTIONS.ORDERS).doc(orderId).update({
-        status: "READY",
-        updatedAt: Date.now(),
-      });
-
-      const updatedDoc = await db
-        .collection(this.collection)
-        .doc(routeId)
-        .get();
-      return this.parseRoute({
-        id: updatedDoc.id,
-        ...updatedDoc.data(),
-      } as Route);
-    }
-
+  if (remainingOrderIds.length > 0) {
     const remainingOrdersDocs = await Promise.all(
       remainingOrderIds.map((id) =>
         db.collection(COLLECTIONS.ORDERS).doc(id).get()
@@ -430,30 +406,33 @@ export class RoutesService {
     const { optimizedOrder, route: osrmRoute } =
       await osrmService.optimizeRoute(allCoordinates);
 
-    const optimizedOrderIds = optimizedOrder
+    newOrders = optimizedOrder
       .slice(1)
       .map((idx) => remainingOrders[idx - 1]?.id)
       .filter((id): id is string => id !== undefined);
 
-    const geometryString = normalizeGeometry(osrmRoute.geometry);
-
-    await db.collection(this.collection).doc(routeId).update({
-      orders: optimizedOrderIds,
-      geometry: geometryString,
-      updatedAt: Date.now(),
-    });
-
-    await db.collection(COLLECTIONS.ORDERS).doc(orderId).update({
-      status: "READY",
-      updatedAt: Date.now(),
-    });
-
-    const updatedDoc = await db.collection(this.collection).doc(routeId).get();
-    return this.parseRoute({
-      id: updatedDoc.id,
-      ...updatedDoc.data(),
-    } as Route);
+    geometryString = normalizeGeometry(osrmRoute.geometry);
   }
+
+  await db.collection(this.collection).doc(routeId).update({
+    orders: newOrders,
+    geometry: geometryString,
+    updatedAt: Date.now(),
+  });
+
+  await db.collection(COLLECTIONS.ORDERS).doc(orderId).update({
+    status: "READY",
+    updatedAt: Date.now(),
+  });
+
+  const updatedDoc = await db.collection(this.collection).doc(routeId).get();
+  return this.parseRoute({
+    id: updatedDoc.id,
+    ...updatedDoc.data(),
+  } as Route);
+}
+
+
 
   async markOrderAsDelivered(
     routeId: string,
@@ -469,28 +448,6 @@ export class RoutesService {
     }
     if (route.status !== "IN_PROGRESS") {
       throw new Error("Solo se pueden marcar entregas en rutas en progreso");
-    }
-    const deliverySnapshot = await db
-      .collection(COLLECTIONS.DELIVERIES)
-      .where("routeId", "==", routeId)
-      .where("orderId", "==", orderId)
-      .get();
-
-    if (deliverySnapshot.empty) {
-      await db.collection(COLLECTIONS.DELIVERIES).add({
-        routeId,
-        orderId,
-        status: "DELIVERED",
-        deliveredAt: Date.now(),
-        createdAt: Date.now(),
-      });
-    } else {
-      const deliveryDoc = deliverySnapshot.docs[0];
-      await db.collection(COLLECTIONS.DELIVERIES).doc(deliveryDoc!.id).update({
-        status: "DELIVERED",
-        deliveredAt: Date.now(),
-        updatedAt: Date.now(),
-      });
     }
 
     await db.collection(COLLECTIONS.ORDERS).doc(orderId).update({

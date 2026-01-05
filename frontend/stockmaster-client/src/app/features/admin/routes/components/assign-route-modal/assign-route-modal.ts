@@ -1,10 +1,10 @@
 import { Component, input, output, EventEmitter } from '@angular/core';
 import type { Route } from '../../../../../core/models/route.model';
 import { NgClass } from '@angular/common';
-
+import { LucideAngularModule, Users, Package, Plus, Route as RouteIcon, X, AlertTriangle, Info, ChevronRight } from 'lucide-angular';
 @Component({
   selector: 'app-assign-route-modal',
-  imports: [NgClass],
+  imports: [NgClass, LucideAngularModule],
   templateUrl: './assign-route-modal.html',
   styleUrl: './assign-route-modal.css',
 })
@@ -12,6 +12,15 @@ export class AssignRouteModal {
   routes = input<Route[]>([]);
   routeSelected = output<string>();
   close = output<void>();
+  readonly PlusIcon = Plus;
+readonly RouteIcon = RouteIcon;
+readonly PackageIcon = Package;
+readonly UsersIcon = Users;
+readonly CloseIcon = X;
+readonly AlertIcon = AlertTriangle;
+readonly InfoIcon = Info;
+readonly ChevronRightIcon = ChevronRight;
+
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       PLANNED: 'Planificada',
