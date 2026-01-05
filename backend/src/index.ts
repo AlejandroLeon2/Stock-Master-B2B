@@ -12,6 +12,7 @@ import productRoutes from "./routes/product.routes";
 import routesRoutes from "./routes/routes.routes";
 import settingsRoutes from "./routes/settings.routes";
 import { userRoutes } from "./routes/user.routes";
+import  pdf  from "./routes/PDF/documentos.routes";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,6 +31,7 @@ app.use("/v1/api/categories", categoryRoutes);
 app.use("/v1/api/orders", orderRoutes);
 app.use("/v1/api/auth", authRoutes);
 app.use("/v1/api/users", userRoutes);
+app.use("/v1/api/document", pdf);
 app.use("/v1/api/newsletter", newsletterRoutes);
 app.use("/v1/api/routes", routesRoutes);
 app.use("/v1/api/drivers", driversRoutes);
