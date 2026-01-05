@@ -19,20 +19,33 @@ export class ApiService {
 
   apiUrl = environment.apiURL;
 
-  get<T>(path: string, options?: HttpOptions): Observable<ApiResponse<T>> {
-    return this.http.get<ApiResponse<T>>(this.apiUrl + path, options);
+  get<T = undefined, U = undefined>(
+    path: string,
+    options?: HttpOptions
+  ): Observable<ApiResponse<T, U>> {
+    return this.http.get<ApiResponse<T, U>>(this.apiUrl + path, options);
   }
 
-  post<T>(path: string, data: unknown, options?: HttpOptions): Observable<ApiResponse<T>> {
-    return this.http.post<ApiResponse<T>>(this.apiUrl + path, data, options);
+  post<T = undefined, U = undefined>(
+    path: string,
+    data: unknown,
+    options?: HttpOptions
+  ): Observable<ApiResponse<T, U>> {
+    return this.http.post<ApiResponse<T, U>>(this.apiUrl + path, data, options);
   }
 
-  put<T>(path: string, data: unknown, options?: HttpOptions): Observable<ApiResponse<T>> {
-    return this.http.put<ApiResponse<T>>(this.apiUrl + path, data, options);
+  put<T = undefined, U = undefined>(
+    path: string,
+    data: unknown,
+    options?: HttpOptions
+  ): Observable<ApiResponse<T, U>> {
+    return this.http.put<ApiResponse<T, U>>(this.apiUrl + path, data, options);
   }
 
-  delete<T>(path: string, options?: HttpOptions): Observable<ApiResponse<T>> {
-    console.log('mostrnado url', this.apiUrl + path);
-    return this.http.delete<ApiResponse<T>>(this.apiUrl + path, options);
+  delete<T = undefined, U = undefined>(
+    path: string,
+    options?: HttpOptions
+  ): Observable<ApiResponse<T, U>> {
+    return this.http.delete<ApiResponse<T, U>>(this.apiUrl + path, options);
   }
 }
