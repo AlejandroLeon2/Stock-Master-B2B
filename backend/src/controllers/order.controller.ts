@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { orderSchema } from "../models/order.model";
 import { OrderService } from "../services/order/order.service";
 import { ProductService } from "../services/product.service";
@@ -11,7 +11,7 @@ class OrderController {
     this.orderService = orderService;
   }
 
-  async createOrder(req: Request, res: Response) {
+  async createOrder(req: Request, res: Response, next: NextFunction) {
     try {
       // Validate body request to match Order schema
       const result = orderSchema.safeParse(req.body);
@@ -28,7 +28,12 @@ class OrderController {
       }
 
       const createOrderResponse = await this.orderService.createOrder(req.body);
-      res.status(201).json(createOrderResponse);
+
+      // luego de crear la orden, almacenamos el id en res.locals para usarlo en el siguiente controller
+      res.locals.orderId = createOrderResponse.data?.id; // Store orderId in res.locals
+          res.status(201).json(createOrderResponse);
+      return next();
+
     } catch (error) {
       console.log(error);
       res
