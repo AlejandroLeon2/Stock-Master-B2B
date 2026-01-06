@@ -3,6 +3,7 @@ import { orderSchema } from "../models/order.model";
 import { OrderService } from "../services/order/order.service";
 import { ProductService } from "../services/product.service";
 import { CustomResponse } from "../utils/custom-response";
+import { StatisticService } from "../services/statistic.service";
 
 class OrderController {
   private orderService: OrderService;
@@ -27,9 +28,12 @@ class OrderController {
       }
 
       const createOrderResponse = await this.orderService.createOrder(req.body);
+
       // luego de crear la orden, almacenamos el id en res.locals para usarlo en el siguiente controller
       res.locals.orderId = createOrderResponse.data?.id; // Store orderId in res.locals
+          res.status(201).json(createOrderResponse);
       return next();
+
     } catch (error) {
       console.log(error);
       res
@@ -132,9 +136,47 @@ class OrderController {
         );
     }
   }
+  async updateStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const order = await orderService.updateStatus(id!, status);
+      res.json({ success: true, data: order });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  }
+  async getPendingForDelivery(req: Request, res: Response) {
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    
+    const result = await this.orderService.getOrdersPendingForDelivery({
+      page,
+      limit,
+    });
+    
+    res.status(200).json(
+      CustomResponse.success(
+        result,
+        "Pedidos pendientes obtenidos exitosamente"
+      )
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(400).json(
+      CustomResponse.error(
+        "ORDER_ERROR",
+        "Error al obtener pedidos pendientes"
+      )
+    );
+  }
+}
+
 }
 
 const productService = new ProductService();
-const orderService = new OrderService(productService);
+const statisticService = new StatisticService();
+const orderService = new OrderService(productService, statisticService);
 const orderController = new OrderController(orderService);
 export default orderController;

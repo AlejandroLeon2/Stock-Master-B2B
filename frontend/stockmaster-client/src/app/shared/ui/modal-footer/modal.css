@@ -1,0 +1,203 @@
+/* ============================= */
+/* CONFIGURACIÓN GENERAL DEL MODAL */
+/* ============================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.modal-container {
+  background: #fff;
+  color: #111;
+  padding: 1.5rem 1.75rem;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+/* ============================= */
+/* CABECERA DEL MODAL */
+/* ============================= */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #374151;
+  transition: transform 0.2s ease;
+}
+
+.close-button:hover {
+  transform: scale(1.1);
+}
+
+/* ============================= */
+/* CONTENIDO GENERAL */
+/* ============================= */
+.modal-content {
+  margin-top: 1rem;
+  line-height: 1.6;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.modal-content ul {
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+/* ============================= */
+/* MODAL DE TÉRMINOS */
+/* ============================= */
+.terms-content h3 {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.update-date {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+/* ============================= */
+/* MODAL DE FAQ */
+/* ============================= */
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem 0;
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.faq-answer {
+  margin-top: 0.5rem;
+  color: #374151;
+}
+
+.contact-box {
+  margin-top: 1.25rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ============================= */
+/* MODAL DE SOBRE NOSOTROS */
+/* ============================= */
+.about-content p {
+  margin-bottom: 0.75rem;
+}
+
+.about-list {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  list-style-type: '✔ ';
+  color: #2563eb;
+}
+
+.about-signature {
+  text-align: right;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* ============================= */
+/* MODAL DE SUSCRIPCIÓN EXITOSA */
+/* ============================= */
+.success-content {
+  text-align: center;
+}
+
+.modal-confirm {
+  margin-top: 1rem;
+  background-color: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-confirm:hover {
+  background-color: #1d4ed8;
+}
+
+/* ============================= */
+/* ANIMACIÓN GENERAL */
+/* ============================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================= */
+/* RESPONSIVE DESIGN */
+/* ============================= */
+@media (max-width: 768px) {
+  .modal-container {
+    max-width: 95%;
+    padding: 1.25rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .modal-content {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-container {
+    border-radius: 12px;
+  }
+
+  .modal-confirm {
+    width: 100%;
+  }
+}

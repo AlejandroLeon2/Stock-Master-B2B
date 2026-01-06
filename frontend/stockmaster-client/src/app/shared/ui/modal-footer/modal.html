@@ -1,0 +1,187 @@
+<!-- Modal principal controlado por ModalService -->
+@if (modalService.currentModal()) {
+  <section 
+    class="modal-backdrop"
+    (click)="onBackdropClick($event)"
+    (keydown)="onKeyDown($event)"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true">
+
+    <!-- ============================================ -->
+    <!-- 📄 MODAL: TÉRMINOS Y CONDICIONES -->
+    <!-- ============================================ -->
+    @if (modalService.currentModal() === 'terms') {
+      <article class="modal-container rounded-sm">
+        <header class="modal-header">
+          <h2>📄 Términos y Condiciones</h2>
+          <button type="button" class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
+            <lucide-icon [img]="X" [size]="24"></lucide-icon>
+          </button>
+        </header>
+
+        <section class="modal-content terms-content">
+          <p class="update-date">Última actualización: Enero 2026</p>
+
+          <section class="terms-section">
+            <h3>1. Aceptación de los Términos</h3>
+            <p>
+              Al acceder y utilizar Stock Master B2B, usted acepta estar legalmente vinculado por estos Términos y Condiciones.
+              Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestros servicios.
+            </p>
+          </section>
+
+          <section class="terms-section">
+            <h3>2. Descripción de los Servicios</h3>
+            <p>La plataforma incluye:</p>
+            <ul>
+              <li>Gestión de productos y stock</li>
+              <li>Pedidos y facturación</li>
+              <li>Reportes de ventas</li>
+              <li>Integraciones con terceros</li>
+            </ul>
+          </section>
+
+          <section class="terms-section">
+            <h3>3. Registro y Cuenta</h3>
+            <p>Debe crear una cuenta proporcionando información precisa. Usted es responsable de la confidencialidad de sus credenciales.</p>
+          </section>
+
+          <section class="terms-section">
+            <h3>4. Uso Permitido</h3>
+            <ul>
+              <li>No usar la plataforma para actividades ilegales</li>
+              <li>No introducir malware ni código malicioso</li>
+              <li>No intentar acceder a datos de otros usuarios</li>
+            </ul>
+          </section>
+
+          <section class="terms-section">
+            <h3>5. Propiedad Intelectual</h3>
+            <p>Todos los derechos de la plataforma pertenecen a Stock Master B2B o sus licenciantes.</p>
+          </section>
+
+          <section class="terms-section">
+            <h3>6. Contacto</h3>
+            <p>Correo: <strong>legal@stockmaster.com</strong></p>
+          </section>
+        </section>
+      </article>
+    }
+
+    <!-- ============================================ -->
+    <!-- ❓ MODAL: PREGUNTAS FRECUENTES -->
+    <!-- ============================================ -->
+    @if (modalService.currentModal() === 'faq') {
+      <article class="modal-container">
+        <header class="modal-header">
+          <h2>❓ Preguntas Frecuentes</h2>
+          <button type="button" class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
+            <lucide-icon [img]="X" [size]="24"></lucide-icon>
+          </button>
+        </header>
+
+        <section class="modal-content faq-content">
+          <p class="faq-intro">Encuentra respuestas rápidas a las preguntas más comunes sobre Stock Master B2B.</p>
+
+          <section class="faq-list">
+            @for (faq of faqs; track faq.question) {
+              <article class="faq-item" [class.open]="faq.isOpen">
+                <button type="button" class="faq-question" (click)="toggleFaq(faq)">
+                  <span>{{ faq.question }}</span>
+                  <span class="icon">{{ faq.isOpen ? '−' : '+' }}</span>
+                </button>
+                @if (faq.isOpen) {
+                  <section class="faq-answer">
+                    <p>{{ faq.answer }}</p>
+                  </section>
+                }
+              </article>
+            }
+          </section>
+
+          <aside class="contact-box">
+            <h4>¿No encuentras lo que buscas?</h4>
+            <p>Contáctanos en: <strong>support@stockmaster.com</strong></p>
+          </aside>
+        </section>
+      </article>
+    }
+
+    <!-- ============================================ -->
+    <!-- 👥 MODAL: SOBRE NOSOTROS -->
+    <!-- ============================================ -->
+    @if (modalService.currentModal() === 'about') {
+      <article class="modal-container">
+        <header class="modal-header">
+          <h2>👥 Sobre Nosotros</h2>
+          <button type="button" class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
+            <lucide-icon [img]="X" [size]="24"></lucide-icon>
+          </button>
+        </header>
+
+        <section class="modal-content about-content">
+          <p>
+            <strong>Stock Master B2B</strong> es una plataforma tecnológica diseñada para optimizar la gestión de inventario,
+            operaciones comerciales y relaciones entre empresas (B2B).
+          </p>
+
+          <p>
+            Nuestro objetivo es ofrecer soluciones inteligentes que integren datos en tiempo real, reduzcan errores operativos
+            y mejoren la toma de decisiones empresariales.
+          </p>
+
+          <ul class="about-list">
+            <li>✔ Más de 500 empresas confían en nosotros</li>
+            <li>✔ Integraciones con plataformas ERP y CRM</li>
+            <li>✔ Soporte 24/7 y actualizaciones constantes</li>
+          </ul>
+
+          <p class="about-signature">Equipo Stock Master B2B 🚀</p>
+        </section>
+      </article>
+    }
+
+    <!-- ============================================ -->
+    <!-- 🎉 MODAL: SUSCRIPCIÓN EXITOSA -->
+    <!-- ============================================ -->
+    @if (modalService.currentModal() === 'newsletter-success') {
+      <article class="modal-container">
+        <header class="modal-header">
+          <h2>🎉 ¡Suscripción exitosa!</h2>
+          <button type="button" class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
+            <lucide-icon [img]="X" [size]="24"></lucide-icon>
+          </button>
+        </header>
+
+        <section class="modal-content success-content">
+          <p>
+            Gracias por suscribirte al newsletter de <strong>Stock Master B2B</strong>.
+          </p>
+          <p>Pronto recibirás actualizaciones y promociones exclusivas.</p>
+
+          <button class="modal-confirm" (click)="closeModal()">Aceptar</button>
+        </section>
+      </article>
+    }
+
+    <!-- MODAL: CORREO YA SUSCRITO -->
+    @if (modalService.currentModal() === 'newsletter-duplicate') {
+      <section class="modal-backdrop" (click)="onBackdropClick($event)">
+        <article class="modal-container" role="dialog" aria-modal="true">
+          <header class="modal-header">
+            <h2>⚠️ Correo ya suscrito</h2>
+            <button type="button" class="close-button" (click)="closeModal()" aria-label="Cerrar    modal">
+              <lucide-icon [img]="X" [size]="24"></lucide-icon>
+            </button>
+          </header>
+          <section class="modal-content success-content">
+            <p>Este correo ya está registrado en nuestro newsletter.</p>
+            <p>Gracias por mantenerte al día con <strong>Stock Master B2B</strong>.</p>
+            <button class="modal-confirm" (click)="closeModal()">Aceptar</button>
+          </section>
+        </article>
+      </section>
+    }
+  </section>
+}

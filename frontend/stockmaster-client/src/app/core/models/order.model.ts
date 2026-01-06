@@ -3,8 +3,13 @@ import { z } from 'zod';
 export const ORDER_VARIANT = {
   unit: 'unit',
   box: 'box',
-  bulk: 'bulk',
 } as const;
+
+export const ORDER_VARIANT_LABELS = {
+  [ORDER_VARIANT.unit]: 'unidad',
+  [ORDER_VARIANT.box]: 'caja',
+};
+
 //usar type para definir la interfaz
 export type OrderVariant = (typeof ORDER_VARIANT)[keyof typeof ORDER_VARIANT];
 
@@ -104,15 +109,6 @@ export const orderSchema = z.object({
 
   // --- Pago
   payment: orderPaymentInfoSchema,
-
-  // --- Logística
-  assignedDriverId: z.string().optional(),
-  routeId: z.string().optional(),
-
-  // --- Documentos
-  remisionPdfUrl: z.string().optional(),
-  invoicePdfUrl: z.string().optional(),
-
   // --- Metadata
   createdAt: z.number().optional(),
   updatedAt: z.number().optional(),
