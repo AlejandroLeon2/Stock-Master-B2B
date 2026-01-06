@@ -17,6 +17,7 @@ import { TableColumn } from '../../../../../../shared/ui/data-table/models/table
 import { ORDER_ACTION, OrderAction } from '../order-actions/order-action.model';
 import { OrderActions } from '../order-actions/order-actions';
 import { OrderEditModal } from '../order-edit-modal/order-edit-modal';
+import { BreakpointService } from '../../../../../../shared/utils/breakpoint.service';
 
 interface OrderRow {
   id: string;
@@ -25,6 +26,7 @@ interface OrderRow {
   createdAt: string;
   status: OrderStatus;
   total: number;
+  items: number;
   actions: TemplateRef<any>;
 }
 [];
@@ -48,6 +50,7 @@ export class OrdersTable implements OnInit, AfterViewInit {
   isLoading = signal(true);
 
   orderService = inject(OrderService);
+  breakpointService = inject(BreakpointService);
   router = inject(Router);
 
   ngOnInit() {
@@ -92,14 +95,17 @@ export class OrdersTable implements OnInit, AfterViewInit {
       {
         key: 'createdAt',
         label: 'Fecha',
+        hideOnMobile: true,
       },
       {
         key: 'items',
         label: 'Items',
+        hideOnTablet: true,
       },
       {
         key: 'total',
         label: 'Total',
+        hideOnMobile: true,
       },
       {
         key: 'status',

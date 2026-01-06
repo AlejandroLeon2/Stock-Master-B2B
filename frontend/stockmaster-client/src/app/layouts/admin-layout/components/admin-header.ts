@@ -1,15 +1,28 @@
 import { Component, signal, inject, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, User, Settings, LogOut, ChevronDown } from 'lucide-angular';
+import { LucideAngularModule, User, Settings, LogOut, ChevronDown, Menu } from 'lucide-angular';
 import { AuthService } from '../../../core/auth/auth.service';
+import { LayoutService } from '../../../core/services/layout.service';
 
 @Component({
   selector: 'app-admin-header',
   imports: [LucideAngularModule, RouterLink],
   template: `
     <header
-      class="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-6 sticky top-0 z-20"
+      class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20"
     >
+      <!-- Hamburger Button (Mobile/Tablet only) -->
+      <button 
+        (click)="layoutService.toggleSidebar()" 
+        class="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        aria-label="Toggle menu"
+      >
+        <lucide-icon [img]="MenuIcon" class="w-6 h-6 text-gray-600" />
+      </button>
+
+      <!-- Spacer for desktop (pushes profile to right) -->
+      <div class="hidden lg:block"></div>
+
       <!-- User Profile Dropdown -->
       <div class="relative">
         <button
@@ -72,6 +85,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 })
 export class AdminHeader {
   private authService = inject(AuthService);
+  layoutService = inject(LayoutService);
   currentUser = this.authService.currentUser;
   userRole = this.authService.userRole;
 
@@ -98,6 +112,7 @@ export class AdminHeader {
   readonly SettingsIcon = Settings;
   readonly LogOutIcon = LogOut;
   readonly ChevronDownIcon = ChevronDown;
+  readonly MenuIcon = Menu;
 
   toggleMenu() {
     this.isOpen.update((v) => !v);
