@@ -23,8 +23,8 @@ export class OrderService {
     return this.apiService.get<OrdersPaginatedResponse>('/orders/ready', { params });
   }
 
-  getOrders() {
-    return this.apiService.get<OrdersPaginatedResponse>('/orders');
+  getOrders(params: { page?: number } = { page: 1 }) {
+    return this.apiService.get<OrdersPaginatedResponse>('/orders', { params });
   }
 
   updateOrderStatus(id: string, status: string) {

@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
     // Entorno y características modernas
-    "lib": ["ESNext"],
+    "lib": ["ES2020"],
     "typeRoots": ["node_modules/@types", "src/types"],
     "target": "ES2020",
-    "module": "ESNext",
+    "module": "commonjs",
     "rootDir": "./src",
     "outDir": "./dist",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
 
     // Emisión de archivos
