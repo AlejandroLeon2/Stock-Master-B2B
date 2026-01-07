@@ -143,15 +143,7 @@ Stock-Master-B2B/
    
    Esto crea `src/environments/environment.ts` con las variables de Firebase.
 
-5. **Iniciar en modo desarrollo**:
-   ```bash
-   # Desde la raíz
-   bun run dev
-   ```
 
-   Esto iniciará:
-   - **Backend** en `http://localhost:3000`
-   - **Frontend** en `http://localhost:4200`
 
 ---
 
