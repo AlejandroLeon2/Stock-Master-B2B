@@ -28,9 +28,13 @@ export class OrderController {
 
       const createOrderResponse = await this.orderService.createOrder(req.body);
 
-      if (createOrderResponse.success) {
-        const respuestaid = createOrderResponse.data?.id;
-        await this.pdfService.emitFactura(respuestaid!);
+      try {
+        if (createOrderResponse.success) {
+          const respuestaid = createOrderResponse.data?.id;
+          await this.pdfService.emitFactura(respuestaid!);
+        }
+      } catch (error) {
+        console.error("Error generating PDF invoice", error);
       }
 
       // luego de crear la orden, almacenamos el id en res.locals para usarlo en el siguiente controller
