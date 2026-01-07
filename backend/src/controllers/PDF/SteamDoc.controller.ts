@@ -11,7 +11,7 @@ export class StreamDocController {
     streamPdf = async (req: Request, res: Response, type: string) => {
         try {
             // obtenemos el uid del usuario autenticado
-            const orderId:string = req.user?.uid || " ";
+            const orderId:string = req.params.orderDoc || " ";
             // obtenemos la url del pdf desde firestore
             const url:string = await this.pdf.getUrl(orderId , type);
             // configuramos los headers para enviar el pdf
@@ -35,11 +35,6 @@ export class StreamDocController {
             }                
         }
     };
-
-    testOrders = async (req: Request, res: Response) => {
-
-    }
-
 }
 
 const streamDocController = new StreamDocController();
