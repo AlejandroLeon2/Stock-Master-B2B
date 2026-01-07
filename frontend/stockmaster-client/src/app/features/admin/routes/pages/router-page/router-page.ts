@@ -1,22 +1,22 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Users, Package, Plus, Route as RouteIcon } from 'lucide-angular';
-import { DriversService } from '../../services/drivers.service';
-import { RoutesService } from '../../services/routes.service';
-import { Driver, DriverStatus } from '../../../../../core/models/driver.model';
-import { Route, RouteStatus } from '../../../../../core/models/route.model';
-import { Order, OrderStatus, ORDER_STATUS } from '../../../../../core/models/order.model';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { LucideAngularModule, Package, Plus, Route as RouteIcon, Users } from 'lucide-angular';
+import { AuthService } from '../../../../../core/auth/auth.service';
 import { Delivery } from '../../../../../core/models/delivery.model';
+import { Driver, DriverStatus } from '../../../../../core/models/driver.model';
+import { Order, ORDER_STATUS, OrderStatus } from '../../../../../core/models/order.model';
+import { Route, RouteStatus } from '../../../../../core/models/route.model';
+import { OrderService } from '../../../../../core/services/order/order';
+import { ToastService } from '../../../../../core/services/toast.service';
+import { AssignRouteModal } from '../../components/assign-route-modal/assign-route-modal';
+import { CreateRouteModal } from '../../components/create-route-modal/create-route-modal';
 import { DriverCardComponent } from '../../components/driver-card.component/driver-card.component';
+import { MapRouterComponent } from '../../components/map-router.component/map-router.component';
 import { OrderCardComponent } from '../../components/order-card.component/order-card.component';
 import { RouteCardComponent } from '../../components/route-card.component/route-card.component';
-import { MapRouterComponent } from '../../components/map-router.component/map-router.component';
-import { OrderService } from '../../../../../core/services/order/order';
-import { AssignRouteModal } from '../../components/assign-route-modal/assign-route-modal';
 import { WAREHOUSE_LOCATION } from '../../config/location';
-import { ToastService } from '../../../../../core/services/toast.service';
-import { CreateRouteModal } from '../../components/create-route-modal/create-route-modal';
-import { AuthService } from '../../../../../core/auth/auth.service';
+import { DriversService } from '../../services/drivers.service';
+import { RoutesService } from '../../services/routes.service';
 type TabKey = 'drivers' | 'orders' | 'routes';
 
 interface Tab {
@@ -68,18 +68,15 @@ export class RouterPage implements OnInit {
   readonly WAREHOUSE_LOCATION = WAREHOUSE_LOCATION;
 
   // Tabs
-    tabs = computed(() => {
+  tabs = computed(() => {
     const allTabs: Tab[] = [
-         { key: 'routes', label: 'Rutas', icon: RouteIcon },
+      { key: 'routes', label: 'Rutas', icon: RouteIcon },
       { key: 'drivers', label: 'Conductores', icon: Users },
       { key: 'orders', label: 'Pedidos', icon: Package },
-   
     ];
-    
+
     // Si es conductor, solo mostrar tab de rutas
-    return this.isDriver() 
-      ? allTabs.filter(tab => tab.key === 'routes')
-      : allTabs;
+    return this.isDriver() ? allTabs.filter((tab) => tab.key === 'routes') : allTabs;
   });
 
   isDriver = computed(() => (this.currentUser ?? '') === 'driver');
@@ -117,7 +114,7 @@ export class RouterPage implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    Promise.all([this.loadRoutes(),this.loadDrivers(),  this.loadOrders(), this.loadReadyOrders()])
+    Promise.all([this.loadRoutes(), this.loadDrivers(), this.loadOrders(), this.loadReadyOrders()])
       .catch((error) => {
         console.error('Error loading data:', error);
         this.error.set('Error al cargar los datos. Por favor, intenta de nuevo.');
