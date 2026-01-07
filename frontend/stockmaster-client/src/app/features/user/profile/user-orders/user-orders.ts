@@ -5,11 +5,12 @@ import { take } from 'rxjs';
 import { AuthService } from '../../../../core/auth/auth.service';
 import { Order } from '../../../../core/models/order.model';
 import { OrderService, OrdersPaginatedResponse } from '../../../../core/services/order/order';
+import { BasicPagination } from '../../../../shared/ui/pagination/basic-pagination/basic-pagination';
 import { UserOrder } from './components/user-order/user-order';
 
 @Component({
   selector: 'app-user-orders',
-  imports: [LucideAngularModule, UserOrder],
+  imports: [LucideAngularModule, UserOrder, BasicPagination],
 
   templateUrl: './user-orders.html',
   styleUrl: './user-orders.css',

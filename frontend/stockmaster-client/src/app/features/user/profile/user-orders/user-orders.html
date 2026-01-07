@@ -21,4 +21,14 @@
     </div>
     } } }
   </div>
+
+  @if(metadata().pages > 1){
+  <div class="mt-6 flex justify-center">
+    <app-basic-pagination
+      [page]="page()"
+      [totalPages]="metadata().pages"
+      (pageChange)="page.set($event)"
+    ></app-basic-pagination>
+  </div>
+  }
 </section>
