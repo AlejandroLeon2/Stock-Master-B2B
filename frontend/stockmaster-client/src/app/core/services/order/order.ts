@@ -35,8 +35,8 @@ export class OrderService {
     return this.apiService.get<Order>(`/orders/${id}`);
   }
 
-  getOrdersByUserId(userId: string) {
-    return this.apiService.get<OrdersPaginatedResponse>(`/orders/user/${userId}`);
+  getOrdersByUserId(userId: string, params: { page?: number } = { page: 1 }) {
+    return this.apiService.get<OrdersPaginatedResponse>(`/orders/user/${userId}`, { params });
   }
 
   deleteOrder(id: string) {
