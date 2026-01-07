@@ -1,6 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { OrderDeliveryAddress } from '../../../../../../../core/models/order.model';
+import { environment } from '../../../../../../../../environments/environment';
 
 @Component({
   selector: 'app-order-header-detail',
@@ -13,12 +14,12 @@ export class OrderHeaderDetail {
   orderDate = input.required<number>();
   totalAmount = input.required<number>();
   address = input.required<OrderDeliveryAddress>();
-  companytName = input.required<string>();
+  companyName = input.required<string>();
 
- openFacturaPdf() {
-  const baseUrl = 'http://localhost:3000/v1/api/document';
-  const orderId = this.orderId();
-  const url = `${baseUrl}/factura/${orderId}`;
-  window.open(url, '_blank');
+  openFacturaPdf() {
+    const baseUrl = environment.apiURL + '/document';
+    const orderId = this.orderId();
+    const url = `${baseUrl}/factura/${orderId}`;
+    window.open(url, '_blank');
   }
 }

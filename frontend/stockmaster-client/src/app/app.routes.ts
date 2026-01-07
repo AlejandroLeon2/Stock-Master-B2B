@@ -15,12 +15,24 @@ export const routes: Routes = [
   {
     path: 'user',
     canActivate: [clientGuard],
-    loadComponent: () => import('./layouts/user-layout/user-layout').then((m) => m.UserLayout),
+    loadComponent: () => import('./layouts/shop-layout/shop-layout').then((m) => m.ShopLayout),
     children: [
       {
         path: 'profile',
         loadComponent: () =>
           import('./features/admin/profile/profile-page').then((m) => m.ProfilePage),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/user/profile/user-orders/user-orders').then((m) => m.UserOrders),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./features/admin/warehouse/orders/components/order-detail/order-detail').then(
+            (m) => m.OrderDetail
+          ),
       },
       {
         path: 'settings',
