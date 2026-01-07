@@ -25,3 +25,7 @@
         tax: number,
         total: number
     }
+
+    export type Driver = {
+
+    }

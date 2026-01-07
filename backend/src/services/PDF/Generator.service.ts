@@ -7,209 +7,247 @@ export class PDFGeneratorService {
 
   createFactura(
     facturaNumber: string,
-    dataUser: Customer,
-    dataOrder: OrderItem[],
+    customerUser: Customer,
+    items: OrderItem[],
     payment: Payment
   ): Readable {
-    const doc = new PDFDocument({ size: 'A4', margin: 10 });
-
-    // --- HEADER ---
-    // Aplicamos el verde oscuro institucional directamente
-    doc.fillColor('#1B4D3E').font('Helvetica-Bold').fontSize(14)
-    .text('NOMBRE COMPLETO DE LA EMPRESA', 0, 30, { width: 595, align: 'center' });
-
-    doc.fillColor('#333333').font('Helvetica').fontSize(10)
-    .text('DIRECCIÓN COMPLETA DE LA EMPRESA', { width: 595, align: 'center' });
-
-    doc.moveDown(0.5);
-    doc.fillColor('#666666').fontSize(9)
-    .text('Teléfono: 987 987 987 | E-mail: test@ejemplo.com | Sucursal: Principal', 
-    { width: 595, align: 'center', lineGap: 5 });
-
-    // Cuadro de Factura - Color institucional
-    doc.rect(440, 10, 150, 100).lineWidth(1.5).strokeColor('#1B4D3E').stroke();
-    doc.fillColor('#333333').font('Helvetica-Bold').fontSize(13)
-    .text(`RUC: ${dataUser.RUC}`, 440, 30, { width: 150, align: 'center' });
-    doc.fillColor('#1B4D3E').text('FACTURA ELECTRÓNICA', 440, 50, { width: 150, align: 'center' });
-    doc.fillColor('#333333').font('Helvetica').text(facturaNumber, 440, 86, { width: 150, align: 'center' });
-
-    // Separador sutil
-    doc.moveTo(20, 120).lineTo(575, 120).lineWidth(1).strokeColor('#2E5A88').stroke();
-
-    // --- DESCRIPCIÓN DE USUARIO ---
-    doc.fillColor('#333333').font('Helvetica-Bold').fontSize(10)
-    .text('Señores: \nDirección: \nRUC: \nMedio de Pago:', 20, 135, { lineGap: 5 });
-
-    const fullAddress = `${dataUser.addres.street} ${dataUser.addres.number}, ${dataUser.addres.city}`;
-    doc.font('Helvetica')
-    .text(`${dataUser.companyName} \n${fullAddress} \n${dataUser.RUC} \n${dataUser.payMethod}`, 130, 135, { lineGap: 5 });
-
-    doc.font('Helvetica-Bold').text(`Fecha Emisión: `, 360, 187);
-    doc.font('Helvetica').text(dataUser.date, 445, 187);
-    doc.font('Helvetica-Bold').text(`Moneda: `, 500, 187);
-    doc.font('Helvetica').text(dataUser.moneda, 550, 187);
-
-    doc.moveTo(20, 205).lineTo(575, 205).lineWidth(1).strokeColor('#2E5A88').stroke();
-
-    // --- CABECERA DE TABLA ---
-    doc.rect(10, 210, 575, 20).fillColor('#1B4D3E').fillAndStroke();
-    doc.fillColor('white').font('Helvetica-Bold').fontSize(9);
-    const headerY = 216;
-    doc.text('#', 10, headerY, { width: 30, align: 'center' })
-    .text('Cant.', 40, headerY, { width: 40, align: 'center' })
-    .text('Und', 150, headerY, { width: 50, align: 'center' })
-    .text('Descripción', 200, headerY, { width: 210, align: 'center' })
-    .text('Precio', 410, headerY, { width: 60, align: 'center' })
-    .text('Valor Venta', 520, headerY, { width: 65, align: 'center' });
-
-    // --- BUCLE DE ITEMS ---
-    // Iniciamos la posición Y debajo de la cabecera
-    let currentY = 235; 
-    const itemHeight = 18; // Reducimos levemente para ganar espacio
-
-    dataOrder.forEach((item, index) => {
-    doc.fillColor('#333333').font('Helvetica').fontSize(9)
-        .text((index + 1).toString(), 10, currentY, { width: 30, align: 'center' })
-        .text(item.quantity.toString(), 40, currentY, { width: 40, align: 'center' })
-        .text('UND', 150, currentY, { width: 50, align: 'center' })
-        .text(item.name, 200, currentY, { width: 210 })
-        .text(item.price.toFixed(2), 410, currentY, { width: 60, align: 'center' })
-        .text((item.price * item.quantity).toFixed(2), 520, currentY, { width: 65, align: 'center' });
-
-    currentY += itemHeight;
-
-    // Línea divisoria muy suave entre filas para mejorar legibilidad
-    doc.moveTo(10, currentY - 2).lineTo(585, currentY - 2).lineWidth(0.5).strokeColor('#F0F0F0').stroke();
-    });
-
-    // --- SECCIÓN DE TOTALES ---
-    const totalYStart = 730;
-    doc.moveTo(340, 720).lineTo(575, 720).lineWidth(1.5).strokeColor('#1B4D3E').stroke();
-
-    doc.fillColor('#333333').font('Helvetica').fontSize(10)
-    .text(`Total Venta Exonerada \nTotal IGV \nImporte Total de la Venta`, 340, totalYStart, { lineGap: 5 });
-
-    doc.font('Helvetica-Bold').text(`${dataUser.moneda} \n${dataUser.moneda} \n${dataUser.moneda}`, 470, totalYStart, { lineGap: 5 });
-
-    doc.font('Helvetica-Bold')
-    .text(`${payment.subtotal.toFixed(2)} \n${payment.tax.toFixed(2)} \n${payment.total.toFixed(2)}`, 
-            0, totalYStart, { width: 575, align: 'right', lineGap: 5 });
-
-    // --- FOOTER ---
-    doc.rect(10, 810, 300, 22).fillColor('#1B4D3E').fillAndStroke();
-    doc.fillColor('#666666').font('Helvetica').fontSize(9)
-    .text('SON: MONTO INGRESADO EN TEXTO', 20, 795, { width: 300 });
-
-    doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
-    .text('Detalle de Forma de Pago: Contado', 10, 816, { width: 300, align: 'center' });
-
-    doc.end();
-    return doc as unknown as Readable;
-  }
-
- // Generador de GUIA de Remicion
-    createGuia(name: string): Readable {
         // Tamaño del documento A4: 595 * 841
         // Mantenemos el margen 10 como pediste
         const doc = new PDFDocument({ size: 'A4', margin: 10 });
 
         // --- HEADER ---
-        doc.font('Helvetica-Bold').fontSize(13)
-        .text('NOMBRE COMPLETO DE LA EMPRESA', 0, 30, { width: 595, align: 'center' });
+        // Elegimos Helvetica-Bold para el título principal para dar autoridad
+        doc.fillColor('#1B4D3E').font('Helvetica-Bold').fontSize(14)
+        .text(`STOCKMASTER B2B DISTRIBUTOR`, 0, 30, { width: 595, align: 'center' });
 
-        doc.font('Helvetica').fontSize(11)
-        .text('DIRECCION COMPLETA DE LA EMPRESA', { width: 595, align: 'center' });
+        doc.fillColor('#333333').font('Helvetica').fontSize(10)
+        .text('123 Calle Principal, Lima, Perú', { width: 595, align: 'center' });
 
         doc.moveDown(0.5);
-        doc.fontSize(10)
-        .text('telefono: 987987987\nE-mail: test@ejemplo.com\nSucursal: Principal', 
-        { width: 595, align: 'center', lineGap: 5 });
+        doc.fillColor('#666666').fontSize(9)
+        .text('telefono: +51 924932128  |  E-mail: legal@stockmaster.com \nSucursal: Principal', 
+        { width: 595, align: 'center', lineGap: 10 });
 
-        // Zona de cuadro para logo
+        // Zona de cuadro para logo - Color gris suave para no distraer
         doc.rect(20, 10, 100, 100)
-        .lineWidth(1)
-        .strokeColor('green')
+        .lineWidth(0.5)
+        .strokeColor('#CCCCCC')
         .stroke();
 
-        // Zona de cuadro para texto de factura
+        // Zona de cuadro para texto de factura - Verde institucional
         doc.rect(440, 10, 150, 100)
-        .lineWidth(1)
-        .strokeColor('green')
+        .lineWidth(1.5)
+        .strokeColor('#1B4D3E')
         .stroke();
 
-        doc.fillColor('black').fontSize(14)
-        .text('RUC: 3216549871', 440, 30, { width: 150, align: 'center' });
-        
-        doc.font('Helvetica-Bold').fontSize(14)
-        .text('FACTURA ELECTRONICA', 440, 50, { width: 150, align: 'center' });
-        
-        doc.font('Helvetica').fontSize(14)
-        .text('FFA9-6543', 440, 86, { width: 150, align: 'center' });
+        doc.fillColor('#333333').font('Helvetica-Bold').fontSize(13)
+        .text('RUC: 20458556253', 440, 30, { width: 150, align: 'center' });
+                
+        doc.font('Helvetica-Bold').fontSize(12).fillColor('#1B4D3E')
+        .text('FACTURA ELECTRÓNICA', 440, 50, { width: 150, align: 'center' });
+                
+        doc.font('Helvetica').fontSize(14).fillColor('#333333')
+        .text(`FFA9-${facturaNumber}`, 440, 86, { width: 150, align: 'center' });
 
-        // Separador azul
-        doc.moveTo(0, 120).lineTo(595, 120)
+        // Separador - Azul acero sutil
+        doc.moveTo(20, 120).lineTo(575, 120)
         .lineWidth(1)
-        .strokeColor('blue')
+        .strokeColor('#2E5A88')
         .stroke();
 
         // --- DESCRIPCION DE USUARIO ---
-        doc.fillColor('black').fontSize(12)
+        doc.fillColor('#333333').font('Helvetica-Bold').fontSize(10)
         .text('Señores: \nDireccion: \nRuc: \nMedio de Pago:', 20, 130, { width: 595, lineGap: 5 });
-
-        doc.text('nombre de empresa \nDIREECCION DE EMPRESA COMPLETA UNIDA \n20654654525 \nContado', 130, 130, { width: 595, lineGap: 5 });
-
-        doc.fontSize(12).text('Fecha Emision: ', 250, 187);
-        doc.text('15/6465-452: ', 335, 187);
-        doc.text('Moneda: ', 460, 187);
-        doc.text('PEN', 510, 187);
         
-        doc.moveTo(0, 205).lineTo(595, 205)
-        .lineWidth(1).strokeColor('blue').stroke();
-        
+        const addresCompleto = `${customerUser.addres.number} ${customerUser.addres.street} ${customerUser.addres.city}`
+
+        doc.font('Helvetica')
+        .text(`${customerUser.companyName} \n${addresCompleto} \n${customerUser.RUC} \n${customerUser.payMethod}`, 130, 130, { width: 595, lineGap: 5 });
+
+        doc.fontSize(10).font('Helvetica-Bold').text('Fecha Emisión: ', 350, 187);
+        doc.font('Helvetica').text(`${customerUser.date}`, 430, 187);
+        doc.font('Helvetica-Bold').text('Moneda: ', 495, 187);
+        doc.font('Helvetica').text('PEN', 545, 187);
+                
+        doc.moveTo(20, 205).lineTo(575, 205)
+        .lineWidth(1).strokeColor('#2E5A88').stroke();
+                
         // --- CABECERA DE TABLA ---
-        // Corregido: Separamos fillColor de la acción de dibujar
-        doc.rect(0, 210, 595, 20)
+        // Rellenamos con el verde oscuro para que resalte
+        doc.rect(10, 210, 575, 20)
         .lineWidth(1)
-        .fillColor('green')
+        .fillColor('#1B4D3E')
         .fillAndStroke();
-        
-        // Resetear a negro para el texto de la tabla
-        doc.fillColor('black').fontSize(11);
-        const tableY = 215;
-        doc.text('#', 0, tableY, { width: 30, align: 'center' })
-        .text('Cant.', 30, tableY, { width: 40, align: 'center' })
-        .text('Codigo', 70, tableY, { width: 70, align: 'center' })
-        .text('Und', 140, tableY, { width: 50, align: 'center' })
-        .text('Descripcion', 190, tableY, { width: 210, align: 'center' })
-        .text('Precio', 400, tableY, { width: 60, align: 'center' })
-        .text('Dscto', 460, tableY, { width: 50, align: 'center' })
-        .text('Valor Venta', 510, tableY, { width: 80, align: 'center' });
+                
+        // Texto de cabecera en blanco para contraste
+        doc.fillColor('white').font('Helvetica-Bold').fontSize(9);
+        const tableY = 216;
+        doc.text('#', 10, tableY, { width: 30, align: 'center' })
+        .text('Cant.', 40, tableY, { width: 40, align: 'center' })
+        .text('Codigo', 80, tableY, { width: 70, align: 'center' })
+        .text('Und', 150, tableY, { width: 50, align: 'center' })
+        .text('Descripción', 200, tableY, { width: 210, align: 'center' })
+        .text('Precio', 410, tableY, { width: 60, align: 'center' })
+        .text('Dscto', 470, tableY, { width: 50, align: 'center' })
+        .text('Valor Venta', 520, tableY, { width: 65, align: 'center' });
+
+        // Iteramos en cada liena para mostrar todos los items
+        let currentY = 230; 
+        const rowHeight = 20; // La altura que definiste en doc.rect
+
+        // 2. Iniciamos el bucle sobre tu array de productos
+        items.forEach((item, index) => {
+        // Usamos currentY para que cada cuadro baje 20 puntos respecto al anterior
+        doc.rect(10, currentY, 575, rowHeight)
+            .lineWidth(1) // Reducimos un poco el grosor para las filas internas
+            .strokeColor('#1B4D3E')
+            .stroke();
+
+        // ACCIÓN: Insertamos los datos dinámicos
+        // Sumamos 5 a currentY para centrar verticalmente el texto (fuente 10 en fila 20)
+        const textY = currentY + 5;
+
+        doc.fillColor('black').font('Helvetica').fontSize(9);
+        doc.text((index + 1).toString(), 10, textY, { width: 30, align: 'center' });
+        doc.text(item.quantity.toString(), 40, textY, { width: 40, align: 'center' });
+        doc.text('-', 80, textY, { width: 70, align: 'center' });
+        doc.text('UND', 150, textY, { width: 50, align: 'center' });
+        doc.text(item.name, 200, textY, { width: 210, align: 'left' });
+        doc.text(item.price.toFixed(2), 410, textY, { width: 60, align: 'center' });
+        // Columna Dscto: Estático (0.00) sin valor
+        doc.text('0.00', 470, textY, { width: 50, align: 'center' });
+        const valorVenta = item.price * item.quantity;
+        doc.text(valorVenta.toFixed(2), 520, textY, { width: 65, align: 'center' });
+        currentY += rowHeight;
+        });
 
         // --- SECCIÓN DE TOTALES ---
-        doc.moveTo(0, 720).lineTo(595, 720).strokeColor('blue').stroke();
-        doc.moveTo(300, 745).lineTo(595, 745).stroke();
-        doc.moveTo(480, 762).lineTo(595, 762).stroke();
-        doc.moveTo(480, 782).lineTo(595, 782).stroke();
+        doc.moveTo(340, 720).lineTo(575, 720).lineWidth(1.5).strokeColor('#1B4D3E').stroke();
 
-        doc.fillColor('black').fontSize(11)
-        .text('Total Venta Exonerada \nTotal IGV \nImporte Total de la Venta', 340, 730, { width: 595, lineGap: 5 });
+        doc.fillColor('#333333').font('Helvetica').fontSize(10)
+        .text('Total Venta Exonerada \nTotal IGV (18%) \nImporte Total de la Venta', 340, 730, { width: 595, lineGap: 5 });
 
-        doc.text('S/. \nS/. \nS/.', 480, 730, { width: 595, lineGap: 5 });
+        doc.font('Helvetica-Bold').text('S/. \nS/. \nS/.', 480, 730, { width: 595, lineGap: 5 });
 
-        // Corregido: Alineación derecha usando un width seguro
-        doc.text('123456.00 \n100.00 \n123456789', 0, 730, { width: 585, align: 'right', lineGap: 5 });
-        
+        // Alineación derecha con peso bold en el total
+        doc.font('Helvetica-Bold').text(`${payment.subtotal} \n${payment.tax} \n${payment.total}`, 0, 730, { width: 575, align: 'right', lineGap: 5 });
+                
         // --- FOOTER ---
-        doc.rect(0, 810, 300, 20)
-        .fillColor('green')
+        doc.rect(10, 810, 300, 22)
+        .fillColor('#1B4D3E')
         .fillAndStroke();
 
-        doc.fillColor('black').fontSize(11)
-        .text('SON: MONTO INGRESADO EN TEXTO', 10, 795, { width: 300 });
-        
-        doc.text('Detalle de Forma de Pago: Contado', 0, 815, { width: 300, align: 'center' });
+        doc.fillColor('#666666').font('Helvetica').fontSize(9)
+        .text('SON: MONTO INGRESADO EN TEXTO', 20, 795, { width: 300 });
+                
+        doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
+        .text(`Detalle de Forma de Pago: ${customerUser.payMethod}`, 10, 816, { width: 300, align: 'center' });
 
         doc.end();
     return doc as unknown as Readable;
+  }
+ // Generador de GUIA de Remicion
+    createGuia(
+        facturaNumber: string,
+        customerUser: Customer,
+        items: OrderItem[],
+    ): Readable {
+        const doc = new PDFDocument({
+            size: "A4",
+            margin: 50,
+        });
+
+        // --- HEADER ---
+        doc.fillColor('#1B4D3E').font('Helvetica-Bold').fontSize(14)
+            .text(`STOCKMASTER B2B DISTRIBUTOR`, 0, 30, { width: 595, align: 'center' });
+
+        // Cuadro de Título de Guía
+        doc.rect(440, 10, 150, 100).lineWidth(1.5).strokeColor('#1B4D3E').stroke();
+        doc.fillColor('#333333').font('Helvetica-Bold').fontSize(13)
+            .text(`RUC: ${customerUser.RUC}`, 440, 30, { width: 150, align: 'center' });
+        doc.fillColor('#1B4D3E').fontSize(11)
+            .text('GUÍA DE REMISIÓN REMITENTE', 440, 50, { width: 150, align: 'center' });
+        doc.fillColor('#333333').fontSize(14)
+            .text(`T001-${facturaNumber}`, 440, 86, { width: 150, align: 'center' });
+
+        // --- BLOQUE 1: DATOS DEL TRASLADO ---
+        doc.rect(10, 120, 575, 45).lineWidth(0.5).strokeColor('#CCCCCC').stroke();
+        doc.fillColor('#333333').font('Helvetica-Bold').fontSize(8)
+            .text('FECHA EMISIÓN:', 20, 125)
+            .text('FECHA INICIO TRASLADO:', 150, 125)
+            .text('MOTIVO DEL TRASLADO:', 320, 125);
+
+        doc.font('Helvetica').fontSize(8)
+            .text(`${customerUser.date}`, 20, 135)
+            .text(`${customerUser.date}`, 150, 135) // ** Podrías agregar una fecha específica de salida
+            .text('VENTA DE MERCADERÍA', 320, 135);
+
+        // --- BLOQUE 2: PUNTOS DE PARTIDA Y LLEGADA ---
+        doc.rect(10, 170, 575, 45).stroke();
+        doc.font('Helvetica-Bold')
+            .text('DIRECCIÓN PUNTO DE PARTIDA:', 20, 175)
+            .text('DIRECCIÓN PUNTO DE LLEGADA (DESTINO):', 300, 175);
+
+        doc.font('Helvetica')
+            .text('** ALMACÉN CENTRAL STOCKMASTER **', 20, 185, { width: 270 })
+            .text(`${customerUser.addres.street} ${customerUser.addres.number}, ${customerUser.addres.city}`, 300, 185, { width: 270 });
+
+        // --- BLOQUE 3: DATOS DEL CONDUCTOR Y VEHÍCULO ---
+        doc.rect(10, 220, 575, 45).stroke();
+        doc.font('Helvetica-Bold')
+            .text('DATOS DEL CONDUCTOR:', 20, 225)
+            .text('UNIDAD DE TRANSPORTE (VEHÍCULO):', 300, 225);
+
+        doc.font('Helvetica')
+            .text('** NOMBRE CONDUCTOR **', 20, 235)
+            .text('** DNI / LICENCIA **', 20, 245)
+            .text('** MARCA / PLACA **', 300, 235)
+            .text('** CERTIFICADO DE INSCRIPCIÓN **', 300, 245);
+
+        // --- CABECERA DE TABLA ---
+        doc.rect(10, 275, 575, 20).fillColor('#1B4D3E').fillAndStroke();
+        doc.fillColor('white').font('Helvetica-Bold').fontSize(9);
+        const tableY = 281;
+        doc.text('#', 10, tableY, { width: 30, align: 'center' })
+            .text('CANTIDAD', 40, tableY, { width: 60, align: 'center' })
+            .text('UNIDAD', 110, tableY, { width: 50, align: 'center' })
+            .text('DESCRIPCIÓN DE BIENES', 170, tableY, { width: 330, align: 'center' })
+            .text('PESO (KG)', 510, tableY, { width: 75, align: 'center' });
+
+        // --- BUCLE DINÁMICO DE ITEMS ---
+        let currentY = 295;
+        const rowHeight = 20;
+
+        items.forEach((item, index) => {
+            // Dibujamos el recuadro de la fila
+            doc.rect(10, currentY, 575, rowHeight).lineWidth(0.5).strokeColor('#1B4D3E').stroke();
+
+            const textY = currentY + 5;
+            doc.fillColor('black').font('Helvetica').fontSize(9);
+
+            doc.text((index + 1).toString(), 10, textY, { width: 30, align: 'center' })
+            .text(item.quantity.toString(), 40, textY, { width: 60, align: 'center' })
+            .text('UND', 110, textY, { width: 50, align: 'center' })
+            .text(item.name, 175, textY, { width: 320, align: 'left' })
+            .text('** 0.00 **', 510, textY, { width: 75, align: 'center' });
+
+            currentY += rowHeight;
+        });
+
+        // --- PIE DE PÁGINA Y FIRMAS ---
+        const footerY = 750;
+        doc.moveTo(40, footerY).lineTo(200, footerY).lineWidth(1).strokeColor('#333333').stroke();
+        doc.moveTo(395, footerY).lineTo(555, footerY).stroke();
+        doc.fontSize(8).fillColor('#666666')
+            .text('FIRMA DEL REMITENTE', 40, footerY + 5, { width: 160, align: 'center' })
+            .text('RECIBIDO (NOMBRE, DNI, FIRMA)', 395, footerY + 5, { width: 160, align: 'center' });
+
+        doc.rect(10, 810, 575, 22).fillColor('#1B4D3E').fillAndStroke();
+        doc.fillColor('white').font('Helvetica-Bold').fontSize(10)
+            .text(`FORMA DE PAGO: ${customerUser.payMethod}`, 10, 816, { width: 575, align: 'center' });
+
+        doc.end();
+
+        return doc as unknown as Readable;
     }
 }
