@@ -3,17 +3,15 @@ import type { OrderItem, Address, Customer, Payment } from "../../models/PDF/doc
 import { PDFStorageService } from "../../services/PDF/Storage.service";
 import { PDFGeneratorService } from "../../services/PDF/Generator.service";
 import {Readable} from "stream";
-import { StatisticService } from "../../services/statistic.service";
+
 import { OrderService } from "../../services/order/order.service";
-import { ProductService } from "../../services/product.service";
+
 export class PDFController {
     
     constructor (
         private pdfStorage = new PDFStorageService(),
         private pdfGenerator = new PDFGeneratorService(),
-        private productService = new ProductService(),
-        private statisticService = new StatisticService(),
-        private orderService = new OrderService(productService, statisticService)
+        private orderService = new OrderService()
     ){} 
 
     emitFactura = async (req: Request, res: Response) => {
@@ -55,7 +53,7 @@ export class PDFController {
 
         let items:OrderItem[] = [];
 
-        dataOrder?.items.forEach( item => {
+        dataOrder?.items.forEach( (item: any) => {
             let order:OrderItem = {
                 name: item.name,
                 quantity: item.quantity,

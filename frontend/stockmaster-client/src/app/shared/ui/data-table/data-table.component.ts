@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, Pipe, PipeTransform } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Pipe, PipeTransform } from '@angular/core';
 import { SortableHeaderDirective, SortEvent } from '../../directives/sortable.directive';
 import { TableColumn } from './models/table.model';
 
@@ -23,6 +23,7 @@ export class GetPropertyPipe implements PipeTransform {
   standalone: true,
   imports: [CommonModule, SortableHeaderDirective, KeyToStringPipe, GetPropertyPipe],
   templateUrl: './data-table.component.html',
+  changeDetection:ChangeDetectionStrategy.OnPush
 })
 export class DataTableComponent<T> {
     @Input() data: T[] = [];
